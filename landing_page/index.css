@@ -22,8 +22,13 @@ img {
 
 .logo {
     font-size: xxx-large;
+    display: flex;
+    display: flex; /* Ensure the logo container uses flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
     @media (min-width: 600px) {
-        color: var (--textColor2)
+        font-size: xx-large;
+
         }
 }
 
@@ -40,14 +45,40 @@ section {
 
 .Title {
     background-color: var(--backgroundColor1);
+    display: block;
+    flex-direction: column;
+    
+}
+
+.intro {
+    display: flex; /* Ensure the parent container uses flexbox */
+    flex-direction:column;
+    align-items: center; /* Center items vertically */
+    justify-content: space-between; /* Add space between items */
+ 
+
     img {
         min-width: 90%
+     
     }
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-content: space-around;
     
+
+
+
+    @media (min-width: 600px) {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        img {
+            max-width: 50%;
+            min-width: 50%;
+            width: 50%;
+         
+        }
+        form {
+            flex: 1; /* Allow the form to grow and take available space */
+        }
+    }
 }
 
 
@@ -56,16 +87,20 @@ form {
     grid-template-areas: "a b" "c c" "d d";
     grid-gap: 0.18rem;
     border-radius: 1.25px; 
-    margin: 3rem auto;
+    margin: 3px auto;
+
+
 
     input {
         min-height: 25px;
         min-width: 10%;
+      
     }
     input[type=text]{
         grid-area: a;
         flex: 1 1 auto;
-        max-width: 95%;
+        max-width: 100%;
+      
     }
     input[type=email]{
         grid-area: b;
@@ -106,13 +141,16 @@ form {
         display: flex;
         width: 100%;
         flex-direction: column;
+        @media (min-width: 600px) {
+            flex-direction: row;
+        }
         .card {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-evenly;
             img {
-                width: 100px;
+                width: 6rem;
                 border-radius: 30px, 30px;
             }
             p{
@@ -131,6 +169,11 @@ form {
     gap: 5px;
     .line {
         max-width: 100%;
+
+        @media (min-width: 520px) {
+            max-width: 70%;
+            min-width: 70%;
+        }
         background-color: var(--backgroundColor3);
         border-radius: 5px 5px;
         padding: 5px;
@@ -143,6 +186,7 @@ form {
             .title {
                 padding-left: 5px;
                 margin: 5px 0px;
+                font-weight: bold;
             }
         }
         .reponse {
@@ -165,6 +209,11 @@ form {
     flex-wrap: wrap;
     justify-content:flex-start;
     align-items: flex-start;
+    @media (min-width: 600px) {
+        justify-content: space-around;
+        
+    }
+
     background-color: var(--backgroundColor4);
     div {
         display: flex;
@@ -176,13 +225,22 @@ form {
             margin: 0px
         }
     }
+
     .socialMedia {
-      
+        @media (min-width: 600px) {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
         a {
             display: flex;
             align-items: center;
             text-decoration: none;
-            color: var(--textColor1);
+            color: var(--textColor1);      
         }
     }
+}
+
+h4 {
+    font-weight: bold;
 }
