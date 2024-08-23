@@ -1,3 +1,6 @@
+backend/venv/
+frontend/node_modules/
+frontend/build/
 *.csv
 data_ingest/*
 *.png
