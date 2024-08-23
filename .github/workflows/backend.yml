@@ -24,7 +24,7 @@ jobs:
           python-version: '3.11'
   
       - name: Install dependencies
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           python -m venv venv
           venv\Scripts\activate
@@ -33,9 +33,8 @@ jobs:
           pip list
 
       - name: Run Python script
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           venv\Scripts\activate
-          cd .\backend
           pwd
           pytest
