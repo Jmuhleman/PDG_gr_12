@@ -21,16 +21,16 @@ img {
 }
 
 .logo {
-    position: absolute;
-    left: 10%;
-    top: 5%;
+    font-size: xxx-large;
+    @media (min-width: 600px) {
+        color: var (--textColor2)
+        }
 }
 
 section {
     display: flex;
     margin: auto;
     padding: 5%;
-    padding: auto;
     width: 80%;
     flex-direction: row;
     align-items: center;
@@ -41,22 +41,31 @@ section {
 .Title {
     background-color: var(--backgroundColor1);
     img {
-        width: 50%
+        min-width: 90%
     }
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: space-around;
+    
 }
+
 
 form {
     display: grid;
     grid-template-areas: "a b" "c c" "d d";
-    grid-gap: 3px;
-    border-radius: 20px;
-    margin: 50px auto;
+    grid-gap: 0.18rem;
+    border-radius: 1.25px; 
+    margin: 3rem auto;
+
     input {
-        height: 25px;
+        min-height: 25px;
+        min-width: 10%;
     }
     input[type=text]{
         grid-area: a;
         flex: 1 1 auto;
+        max-width: 95%;
     }
     input[type=email]{
         grid-area: b;
@@ -66,7 +75,7 @@ form {
         background-color: var(--buttonColor);
         color: var(--textColor1);
         cursor: pointer;
-        height: 31px;
+        max-height: 31px;
     }
     input[type=submit]:active {
         background-color: var(--buttonPressedColor);
@@ -90,12 +99,13 @@ form {
 .benefit{
     background-color: var(--backgroundColor2);
     flex-direction: column;
-    flex-wrap: wrap;
+
     justify-content: space-around;
     align-content: space-around;
     div {
         display: flex;
         width: 100%;
+        flex-direction: column;
         .card {
             display: flex;
             flex-direction: column;
@@ -120,7 +130,7 @@ form {
     background-color: var(--backgroundColor1);
     gap: 5px;
     .line {
-        width: 70%;
+        max-width: 100%;
         background-color: var(--backgroundColor3);
         border-radius: 5px 5px;
         padding: 5px;
@@ -153,7 +163,7 @@ form {
 
 .footer {
     flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content:flex-start;
     align-items: flex-start;
     background-color: var(--backgroundColor4);
     div {
@@ -167,6 +177,7 @@ form {
         }
     }
     .socialMedia {
+      
         a {
             display: flex;
             align-items: center;
