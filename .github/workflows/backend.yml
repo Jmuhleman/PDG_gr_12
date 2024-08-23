@@ -36,5 +36,5 @@ jobs:
         working-directory: .\backend
         run: |
           venv\Scripts\activate
-          pwd
+          python app.py
           pytest
