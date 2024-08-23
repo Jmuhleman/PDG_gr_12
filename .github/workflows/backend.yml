@@ -6,7 +6,9 @@ name: CI_Python_module
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: 
+      -main
+      -develop
 
   workflow_dispatch:  # Allows you to manually trigger the workflow from the Actions tab
 
