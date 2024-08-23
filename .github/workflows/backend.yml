@@ -6,9 +6,8 @@ name: CI_Python_module
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "feat_yml_backend" ]
+
   workflow_dispatch:  # Allows you to manually trigger the workflow from the Actions tab
 
 jobs:
@@ -25,17 +24,17 @@ jobs:
           python-version: '3.11'
   
       - name: Install dependencies
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           python -m venv venv
           venv\Scripts\activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install opencv-python
           pip list
 
       - name: Run Python script
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           venv\Scripts\activate
-          python main_img.py
+          Start-Process -FilePath python -ArgumentList "app.py" -NoNewWindow -PassThru | Out-Null
+          pytest
