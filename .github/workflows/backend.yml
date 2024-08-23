@@ -36,5 +36,5 @@ jobs:
         working-directory: .\backend
         run: |
           venv\Scripts\activate
-          python app.py
+          start /B python app.py
           pytest
