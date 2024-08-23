@@ -24,18 +24,17 @@ jobs:
           python-version: '3.11'
   
       - name: Install dependencies
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           python -m venv venv
           venv\Scripts\activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip list
 
       - name: Run Python script
-        working-directory: python_module
+        working-directory: .\backend
         run: |
           venv\Scripts\activate
-          cd .\backend
-          pwd
+          Start-Process -FilePath python -ArgumentList "app.py" -NoNewWindow -PassThru | Out-Null
           pytest
