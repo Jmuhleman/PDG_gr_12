@@ -1,2 +1,4 @@
-ultralytics==8.2.79
-easyocr==1.7.1
+flask
+flask_cors
+pytest
+requests
