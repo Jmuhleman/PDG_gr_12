@@ -1,0 +1,5 @@
+*.csv
+data_ingest/*
+*.png
+*.mp4
+.idea

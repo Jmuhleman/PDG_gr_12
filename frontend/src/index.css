@@ -1,0 +1,44 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0; /* Light grey background */
+  color: #333; /* Dark grey text color */
+  text-align: center; /* Center-align text */
+  padding: 0; /* Remove default padding */
+}
+
+/* Global container styling */
+.container {
+  max-width: 1200px; /* Max width for content */
+  margin: 0 auto; /* Center the container */
+  padding: 20px; /* Padding inside the container */
+}
+
+/* Global link styling */
+a {
+  color: #007bff; /* Bootstrap blue color */
+  text-decoration: none; /* Remove underline from links */
+}
+
+a:hover {
+  text-decoration: underline; /* Underline on hover */
+}
+
+/* Basic utility classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}

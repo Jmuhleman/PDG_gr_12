@@ -1,0 +1,177 @@
+body {
+    --backgroundColor1: #F8F9FB;
+    --backgroundColor2: #E1ECF7;
+    --backgroundColor3: #AECBEB;
+    --backgroundColor4: #83B0E1;
+    --backgroundColor5: #71A5DE;
+
+    --buttonColor: #0872E3;
+    --buttonPressedColor: #0258B3;
+
+    --textColor1: black;
+    --textColor2: #83B0E1;
+
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: var(--backgroundColor5);
+    margin: 0px;
+}
+
+img {
+    width: 50px;
+}
+
+.logo {
+    position: absolute;
+    left: 10%;
+    top: 5%;
+}
+
+section {
+    display: flex;
+    margin: auto;
+    padding: 5%;
+    padding: auto;
+    width: 80%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--backgroundColor1);
+}
+
+.Title {
+    background-color: var(--backgroundColor1);
+    img {
+        width: 50%
+    }
+}
+
+form {
+    display: grid;
+    grid-template-areas: "a b" "c c" "d d";
+    grid-gap: 3px;
+    border-radius: 20px;
+    margin: 50px auto;
+    input {
+        height: 25px;
+    }
+    input[type=text]{
+        grid-area: a;
+        flex: 1 1 auto;
+    }
+    input[type=email]{
+        grid-area: b;
+    }
+    input[type=submit] {
+        grid-area: c;
+        background-color: var(--buttonColor);
+        color: var(--textColor1);
+        cursor: pointer;
+        height: 31px;
+    }
+    input[type=submit]:active {
+        background-color: var(--buttonPressedColor);
+    }
+    p {
+        color: var(--textColor2);
+        grid-area: d;
+        text-align: center;
+        font-size: small;
+        margin-top: 0px;
+    }
+}
+.catchphrase {
+    h1 {
+        margin-bottom: 0;
+    }
+    h4 {
+        margin-top: 2px;
+    }
+}
+.benefit{
+    background-color: var(--backgroundColor2);
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: space-around;
+    div {
+        display: flex;
+        width: 100%;
+        .card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-evenly;
+            img {
+                width: 100px;
+                border-radius: 30px, 30px;
+            }
+            p{
+                text-align: center;
+            }
+        }
+        .card:hover > .moreInfo {
+            display: none;
+        }
+    }
+}
+
+.FAQ {
+    flex-direction: column;
+    background-color: var(--backgroundColor1);
+    gap: 5px;
+    .line {
+        width: 70%;
+        background-color: var(--backgroundColor3);
+        border-radius: 5px 5px;
+        padding: 5px;
+        span {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        
+            .title {
+                padding-left: 5px;
+                margin: 5px 0px;
+            }
+        }
+        .reponse {
+            display:none;
+            text-justify: middle;
+        }
+    }
+    .line:hover .reponse{
+        display: block;
+    }
+}
+
+.directCall {
+    background-color: var(--backgroundColor2);
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: flex-start;
+    background-color: var(--backgroundColor4);
+    div {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-content: start;
+        flex-wrap: wrap;
+        p {
+            margin: 0px
+        }
+    }
+    .socialMedia {
+        a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--textColor1);
+        }
+    }
+}
