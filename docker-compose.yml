@@ -1,0 +1,10 @@
+version: '1'
+services:
+  frontend:
+    image: plate-eyes/frontend:v1
+    ports:
+      - 3000:3000
+  backend:
+    image: plate-eyes/backend:v1
+    ports:
+      - 5000:5000
