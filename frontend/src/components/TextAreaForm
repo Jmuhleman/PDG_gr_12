@@ -1,0 +1,39 @@
+import React, { useState } from "react";
+// import './TextArea.css'; // Make sure this is the path to your CSS file
+
+function TextAreaForm({
+  label = "Your Information:",
+  placeholder = "Enter some text...",
+  buttonText = "Submit",
+  onSubmit = () => {}, // Default to an empty function if no handler is provided
+}) {
+  const [text, setText] = useState("d");
+
+  const handleChange = (event) => {
+    setText(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSubmit(text); // Call the custom submit handler with the current text
+  };
+
+  return (
+    <div className="container">
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="textArea">{label}</label>
+        <textarea
+          id="textArea"
+          className="text-area"
+          value={text}
+          onChange={handleChange}
+          placeholder={placeholder}
+        />
+        <br />
+        <button type="submit" className="submit-button">{buttonText}</button>
+      </form>
+    </div>
+  );
+}
+
+export default TextAreaForm;
