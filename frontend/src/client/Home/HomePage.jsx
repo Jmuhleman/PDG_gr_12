@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import SubmitForm from '../../components/SubmitForm';  
 import { useClient } from '../hooks/useClient';
@@ -9,8 +9,12 @@ import './home.css'
 function Home() {
     const {setClient } = useClient();
     const navigate = useNavigate();
+    useEffect(() => {
+        setClient({ value: "", haveAccount: false });
+    }, []);
 
     const handleSubmit = (text) => {
+        if(text === "") return;
         // Ensure setClient is used correctly. Assuming it expects an object with properties.
         setClient({value: text, haveAccount: false });
         navigate('/billing_overview');
