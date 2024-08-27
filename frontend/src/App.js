@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import './App.css'; // Ensure the path is correct
 import { ClientProvider } from './client/hooks/useClient';
 import BillingOverview from './client/Billing/BillingOverview';
+import HomePage from './client/Home/HomePage';
 
 const router = createBrowserRouter([
     {
@@ -11,7 +12,7 @@ const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <h1>Home</h1>,
+                element: <HomePage />,
             },
             {
                 path: "billing_overview",
