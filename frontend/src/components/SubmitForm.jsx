@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-// import './TextArea.css'; // Make sure this is the path to your CSS file
 
-function TextAreaForm({
+function SubmitForm({
   label = "Your Information:",
   placeholder = "Enter some text...",
   buttonText = "Submit",
   onSubmit = () => {}, // Default to an empty function if no handler is provided
 }) {
-  const [text, setText] = useState("d");
+  const [text, setText] = useState(); // Initialize with an empty string
 
   const handleChange = (event) => {
     setText(event.target.value);
@@ -21,10 +20,11 @@ function TextAreaForm({
   return (
     <div className="container">
       <form onSubmit={handleSubmit}>
-        <label htmlFor="textArea">{label}</label>
-        <textarea
-          id="textArea"
-          className="text-area"
+        <label htmlFor="form-input">{label}</label>
+        <input
+          id="form-input"
+          className="form-input"
+          type="text"  // Use <input> for a single line of text, not <form>
           value={text}
           onChange={handleChange}
           placeholder={placeholder}
@@ -36,4 +36,4 @@ function TextAreaForm({
   );
 }
 
-export default TextAreaForm;
+export default SubmitForm;
