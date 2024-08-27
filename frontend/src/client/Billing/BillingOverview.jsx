@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { APIGetRequest } from '../../utils/APIRequest';
 import { useClient } from '../hooks/useClient';
 import BillingSummary from './BillingSummary';
@@ -9,10 +10,13 @@ export default function BillingOverview() {
 
     const {client} = useClient();
 
+    const navigate = useNavigate()
+
     useEffect(() => {
+        if (client.value === "") navigate('/');
         if (!client.haveAccount)
             APIGetRequest({url: 'https://66ccf8798ca9aa6c8cc92883.mockapi.io/api/plate', setResponse: setdata});
-    }, [client.haveAccount]);
+    }, [client.haveAccount, client.value, navigate]);
 
     return (
         <div>
