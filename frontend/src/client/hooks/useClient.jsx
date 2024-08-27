@@ -12,12 +12,12 @@ class Client {
 }
 
 
-const ClientContext = createContext<Client>(new Client(false, ""));
+const ClientContext = createContext(new Client(false, ""));
   
 export function ClientProvider ({children}) {
 
 
-    const [client, setClient] = useState<Client>(new Client(false, ""));
+    const [client, setClient] = useState(new Client(false, ""));
 
     return (
         <ClientContext.Provider value={{client:client, setClient:setClient}}>
