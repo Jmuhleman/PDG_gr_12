@@ -1,14 +1,14 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import fake_db
 from datetime import datetime
 import psycopg2
-
 from datetime import timedelta
 from decimal import Decimal
 
 app = Flask(__name__)
 CORS(app)
+
+
 db_params = {
     'dbname': 'pdg_db',
     'user': 'postgres',
@@ -16,32 +16,6 @@ db_params = {
     'host': 'localhost',
     'port': '5432'
 }
-
-
-def get_duration(timestamp_in, timestamp_out):
-    if timestamp_in is None or timestamp_out is None:
-        # Vehicle not entered or not yet exited
-        return None
-    
-    try:
-        # Convert string timestamps to datetime objects if they are not already
-        if isinstance(timestamp_in, str):
-            timestamp_in = datetime.fromisoformat(timestamp_in)
-        if isinstance(timestamp_out, str):
-            timestamp_out = datetime.fromisoformat(timestamp_out)
-        
-        # Ensure timestamps are datetime objects
-        if not isinstance(timestamp_in, datetime) or not isinstance(timestamp_out, datetime):
-            raise ValueError("Timestamps must be datetime objects or ISO formatted strings")
-        
-        # Calculate the duration
-        duration = timestamp_out - timestamp_in
-        return duration
-
-    except (ValueError, TypeError) as e:
-        # Handle cases where timestamps are invalid or conversion fails
-        print(f"Error in duration calculation: {e}")
-        return None
 
 
 
@@ -73,7 +47,9 @@ def get_fare_db(parking_name):
             conn.close()
 
 
+
 def calculate_duration_in_minutes(timestamp_in, timestamp_out):
+    """Compute duration and convert the amount in minutes"""
     if timestamp_in is None or timestamp_out is None:
         return None
     
@@ -99,26 +75,28 @@ def calculate_duration_in_minutes(timestamp_in, timestamp_out):
 
 
 def get_amount(total_minutes, parking_name):
+    """Compute total amount to be paid by customer for a given stay"""
     if total_minutes is None:
         return None
 
     fare = get_fare_db(parking_name)
     if fare is None:
         return None
-
+    # as we store fares per hours
     amount = fare * total_minutes / 60
     return f"{amount:.2f}"
 
 
 
 def connect_to_db(params):
+    """Establish connection to DB and return pointer to socket"""
     try:
         conn = psycopg2.connect(**params)
         print("Connection successful")
         cursor = conn.cursor()
 
-        cursor.execute("SELECT version();")
-        db_version = cursor.fetchone()
+        #cursor.execute("SELECT version();")
+        #db_version = cursor.fetchone()
         #print(f"Database version: {db_version}")
 
         return cursor, conn
@@ -126,9 +104,15 @@ def connect_to_db(params):
     except Exception as error:
         print(f"Error connecting to the database: {error}")
 
+
+
+
 def close_connection_db(cursor, conn):
+        """Cut off connection to DB"""
         cursor.close()
         conn.close()
+
+
 
 @app.route('/api/plate/<plate_no>', methods=['GET'])
 def get_plate(plate_no):
