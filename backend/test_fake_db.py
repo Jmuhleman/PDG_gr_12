@@ -27,7 +27,10 @@ def get_plate_data(plate_no):
 
 plate_numbers = [
    'VD12345',
-   'QG13123'
+   'QG13123',
+   'VD12345',
+   'GE67890',
+   'AG34567'
 ]
 
 for plate_no in plate_numbers:

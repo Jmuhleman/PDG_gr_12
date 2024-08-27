@@ -1,13 +1,12 @@
+from datetime import datetime
+
+import psycopg2
 from flask import Flask, jsonify
 from flask_cors import CORS
-from datetime import datetime
-import psycopg2
-from datetime import timedelta
-from decimal import Decimal
+
 
 app = Flask(__name__)
 CORS(app)
-
 
 db_params = {
     'dbname': 'pdg_db',
@@ -18,24 +17,22 @@ db_params = {
 }
 
 
-
-
 def get_fare_db(parking_name):
     """Retrieve fare from the database for a given parking name."""
     conn = None
     cursor = None
     try:
         cursor, conn = connect_to_db(db_params)
-        
+
         query = "SELECT fare FROM parking_fares WHERE parking_name = %s;"
         cursor.execute(query, (parking_name,))
         fare_row = cursor.fetchone()
 
         if fare_row is None:
             return None
-        
+
         return fare_row[0]
-    
+
     except Exception as e:
         print(f"Error retrieving fare: {e}")
         return None
@@ -47,21 +44,20 @@ def get_fare_db(parking_name):
             conn.close()
 
 
-
 def calculate_duration_in_minutes(timestamp_in, timestamp_out):
     """Compute duration and convert the amount in minutes"""
     if timestamp_in is None or timestamp_out is None:
         return None
-    
+
     try:
         if isinstance(timestamp_in, str):
             timestamp_in = datetime.fromisoformat(timestamp_in)
         if isinstance(timestamp_out, str):
             timestamp_out = datetime.fromisoformat(timestamp_out)
-        
+
         if not isinstance(timestamp_in, datetime) or not isinstance(timestamp_out, datetime):
             raise ValueError("Timestamps must be datetime objects or ISO formatted strings")
-        
+
         duration = timestamp_out - timestamp_in
         total_minutes = duration.total_seconds() / 60
         return total_minutes
@@ -69,9 +65,6 @@ def calculate_duration_in_minutes(timestamp_in, timestamp_out):
     except (ValueError, TypeError) as e:
         print(f"Error in duration calculation: {e}")
         return None
-
-
-
 
 
 def get_amount(total_minutes, parking_name):
@@ -87,7 +80,6 @@ def get_amount(total_minutes, parking_name):
     return f"{amount:.2f}"
 
 
-
 def connect_to_db(params):
     """Establish connection to DB and return pointer to socket"""
     try:
@@ -95,9 +87,9 @@ def connect_to_db(params):
         print("Connection successful")
         cursor = conn.cursor()
 
-        #cursor.execute("SELECT version();")
-        #db_version = cursor.fetchone()
-        #print(f"Database version: {db_version}")
+        # cursor.execute("SELECT version();")
+        # db_version = cursor.fetchone()
+        # print(f"Database version: {db_version}")
 
         return cursor, conn
 
@@ -105,13 +97,10 @@ def connect_to_db(params):
         print(f"Error connecting to the database: {error}")
 
 
-
-
 def close_connection_db(cursor, conn):
-        """Cut off connection to DB"""
-        cursor.close()
-        conn.close()
-
+    """Cut off connection to DB"""
+    cursor.close()
+    conn.close()
 
 
 @app.route('/api/plate/<plate_no>', methods=['GET'])
@@ -119,7 +108,7 @@ def get_plate(plate_no):
     """Handles requests to retrieve data based on the plate number."""
     conn = None
     try:
-        
+
         cursor, conn = connect_to_db(db_params)
         query = """
         SELECT pl.parking_name AS parking, pl.timestamp_in AS in, pl.timestamp_out AS out
@@ -130,9 +119,9 @@ def get_plate(plate_no):
 
         cursor.execute(query, (plate_no,))
         res = cursor.fetchall()
-        #print(f"{res}")
-        if not res: 
-            return jsonify({'error': 'Plate number not found'}), 404
+        # print(f"{res}")
+        if not res:
+            return jsonify({'status': 'Plate number not found'}), 404
 
         column_names = [desc[0] for desc in cursor.description]
         results_list = [dict(zip(column_names, row)) for row in res]
@@ -149,12 +138,10 @@ def get_plate(plate_no):
         return jsonify(formatted_results), 200
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'status': str(e)}), 500
 
     finally:
         close_connection_db(cursor, conn)
-
-
 
 
 if __name__ == '__main__':
