@@ -13,13 +13,13 @@ export default function BillingOverview() {
 
     const navigate = useNavigate()
 
-    /*useEffect(() => {
+    useEffect(() => {
         if (client.value === "") navigate('/');
         if (!client.haveAccount)
-            APIGetRequest({url: 'https://66ccf8798ca9aa6c8cc92883.mockapi.io/api/plate', setData: setData, setStatus: setStatus});
-    }, [client.haveAccount, client.value, navigate]);*/
+            APIGetRequest({url: 'localhost:5000/api/plate' + client.value, setData: setData, setStatus: setStatus});
+    }, [client.haveAccount, client.value, navigate]);
 
-    useEffect(() => {
+    /*useEffect(() => {
         setStatus({code: 200, text: "OK"});
         setData(
             {
@@ -41,7 +41,7 @@ export default function BillingOverview() {
                 ]
             }
         )
-    }, []);
+    }, []);*/
 
     return (
         <div>
