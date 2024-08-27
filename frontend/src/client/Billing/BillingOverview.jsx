@@ -21,7 +21,7 @@ export default function BillingOverview() {
 
     return (
         <div>
-            <h1>Toutes vos facture</h1>
+            <h1>Toutes vos factures</h1>
             {
                 status && status.code !== 200 && <h2>Request Status : {status.text}</h2>
             }
