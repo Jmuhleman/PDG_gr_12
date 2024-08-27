@@ -6,8 +6,7 @@ export function APIGetRequest({url, setData, setStatus}) {
         setData(response.data);
     })
     .catch(error => {
-        console.log(error);
-        //setStatue({code:error.response.status, text:error.response.statusText});
+        setStatus({code:error.response.status, text:error.response.statusText});
         console.error('There was an error fetching the data!', error);
     });
 }
@@ -18,6 +17,7 @@ export function APIPostRequest({url, data, setData, setStatus}) {
         setData(response.data);
     })
     .catch(error => {
+        setStatus({code:error.response.status, text:error.response.statusText});
         console.error('There was an error fetching the data!', error);
     });
 }

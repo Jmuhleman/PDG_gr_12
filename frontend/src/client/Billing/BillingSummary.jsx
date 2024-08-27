@@ -7,8 +7,8 @@ import './billing.css';
 // Add 'parking_name' to props validation
 BillingSummary.propTypes = {
     parking_name: PropTypes.string.isRequired,
-    timestamp_in: PropTypes.number.isRequired,
-    timestamp_out: PropTypes.number.isRequired,
+    timestamp_in: PropTypes.string.isRequired,
+    timestamp_out: PropTypes.string.isRequired,
     duration: PropTypes.number.isRequired,
     amount: PropTypes.number.isRequired
 };
