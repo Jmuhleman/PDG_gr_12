@@ -1,0 +1,26 @@
+.billings {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.billingSummary {
+    display: flex;
+    gap: 1rem;
+    border: solid 1px #ccc;
+    border-radius: 20px 20px;
+    padding: 1rem;
+    cursor: pointer;
+    ul {
+        list-style-type: none;
+    }
+    .label li {
+        text-align: right;
+    }
+    .data li {
+        text-align: left;
+    }
+}
+.billingSummary:active   {
+    background-color: #f0f0f0;
+}

@@ -1,26 +1,16 @@
 import React, { createContext, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
-class Client {
-    haveAccount = false;
-    value
 
-    constructor(haveAccount, value) {
-        this.haveAccount = haveAccount;
-        this.value = value;
-    }
-}
-
-
-const ClientContext = createContext(new Client(false, ""));
+const ClientContext = createContext({ haveAccount:false, value: "" });
   
 export function ClientProvider ({children}) {
 
 
-    const [client, setClient] = useState(new Client(false, ""));
+    const [client, setClient] = useState({ haveAccount:false, value: "" });
 
     return (
-        <ClientContext.Provider value={{client:client, setClient:setClient}}>
+        <ClientContext.Provider value={{ client, setClient }}>
             {children}
         </ClientContext.Provider>
     );

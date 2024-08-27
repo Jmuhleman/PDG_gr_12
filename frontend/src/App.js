@@ -2,7 +2,7 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import './App.css'; // Ensure the path is correct
 import { ClientProvider } from './client/hooks/useClient';
-import BillingOverview from './client/BillingOverview';
+import BillingOverview from './client/Billing/BillingOverview';
 
 const router = createBrowserRouter([
     {
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "billing_overview",
-                element: <h1>billing_overview</h1>,
+                element: <BillingOverview />,
             },
         ],
     },
