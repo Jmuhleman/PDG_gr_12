@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import SubmitForm from '../../components/SubmitForm';  // Correct import for PascalCase component
+import SubmitForm from '../../components/SubmitForm';  
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
+import './home.css'
+
 
 function Home() {
-    const { setClient } = useClient();
-    const navigate = useNavigate();  // Initialize useNavigate
+    const {setClient } = useClient();
+    const navigate = useNavigate();
 
     const handleSubmit = (text) => {
         // Ensure setClient is used correctly. Assuming it expects an object with properties.
@@ -19,9 +21,9 @@ function Home() {
             <h1>Welcome to Our Website</h1>
             <p>This is the homepage where you can find an overview of our services and features.</p>
             <SubmitForm
-                label="Your Information"
-                placeholder="Enter your text here..."
-                buttonText="Submit"
+                label="Numéro de plaque : "
+                placeholder="VDO9815..."
+                buttonText="Valider"
                 onSubmit={handleSubmit}
             />
 

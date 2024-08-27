@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import PropTypes from 'prop-types'; 
+import './submitForm.css'
 
 function SubmitForm({
   label = "Your Information:",
@@ -6,7 +8,7 @@ function SubmitForm({
   buttonText = "Submit",
   onSubmit = () => {}, // Default to an empty function if no handler is provided
 }) {
-  const [text, setText] = useState(); // Initialize with an empty string
+  const [text, setText] = useState(''); // Initialize with an empty string
 
   const handleChange = (event) => {
     setText(event.target.value);
@@ -35,5 +37,11 @@ function SubmitForm({
     </div>
   );
 }
+SubmitForm.propTypes = {
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  buttonText: PropTypes.string,
+  onSubmit: PropTypes.func,
+};
 
 export default SubmitForm;
