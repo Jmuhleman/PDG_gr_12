@@ -1,0 +1,46 @@
+/* Form styling */
+.submit-form {
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 20px; /* Padding inside the form */
+    max-width: 400px; /* Maximum width */
+    width: 100%; /* Full width up to max-width */
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+  }
+  
+  /* Label styling */
+  .form-label {
+    font-size: 1rem;
+    margin-bottom: 10px; /* Space below the label */
+    color: #333; /* Dark grey color for text */
+  }
+  
+  /* Input styling */
+  .form-input {
+    width: 100%; /* Full width */
+    padding: 10px; /* Padding inside the input */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 4px; /* Slightly rounded corners */
+    font-size: 1rem; /* Font size */
+    margin-bottom: 20px; /* Space below the input */
+  }
+  
+  /* Button styling */
+  .submit-button {
+    background-color: #007bff; /* Primary blue color */
+    color: #fff; /* White text color */
+    border: none; /* Remove default border */
+    padding: 10px 20px; /* Padding inside the button */
+    border-radius: 4px; /* Slightly rounded corners */
+    font-size: 1rem; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+    align-self: flex-start; /* Align button to the start of the form */
+  }
+  
+  /* Button hover effect */
+  .submit-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
