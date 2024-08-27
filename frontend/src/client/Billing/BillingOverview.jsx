@@ -7,6 +7,7 @@ import './billing.css';
 
 export default function BillingOverview() {
     const [data, setdata] = useState(undefined);
+    const [status, setStatus] = useState(undefined);
 
     const {client} = useClient();
 
@@ -15,14 +16,17 @@ export default function BillingOverview() {
     useEffect(() => {
         if (client.value === "") navigate('/');
         if (!client.haveAccount)
-            APIGetRequest({url: 'https://66ccf8798ca9aa6c8cc92883.mockapi.io/api/plate', setResponse: setdata});
+            APIGetRequest({url: 'https://66ccf8798ca9aa6c8cc92883.mockapi.io/api/plate', setData: setdata, setStatus: setStatus});
     }, [client.haveAccount, client.value, navigate]);
 
     return (
         <div>
             <h1>Toutes vos facture</h1>
             {
-                !data && <p>Chargement...</p>
+                status && status.code !== 200 && <h2>Request Status : {status.text}</h2>
+            }
+            {
+                !status && <p>Chargement...</p>
             }
             <div className="billings">
             {

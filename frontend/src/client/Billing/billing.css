@@ -14,11 +14,8 @@
     ul {
         list-style-type: none;
     }
-    .label li {
-        text-align: right;
-    }
     .data li {
-        text-align: left;
+        text-align: middle;
     }
 }
 .billingSummary:active { 

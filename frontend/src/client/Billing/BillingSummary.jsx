@@ -19,13 +19,6 @@ export default function BillingSummary({parking_name, timestamp_in, duration, am
 
     return (
         <div className="billingSummary">
-            <ul className='label'>
-                <li>{ "Date" }</li>
-                <li>{ "Heure" }</li>
-                <li>{ "Parking" }</li>
-                <li>{ "Durée" }</li>
-                <li>{ "Prix" }</li>
-            </ul>
             <ul className='data'>
                 <li>{ dateTimeIn.toFormat('dd LLL yyyy') }</li>
                 <li>{ dateTimeIn.toFormat('hh:mm') }</li>
