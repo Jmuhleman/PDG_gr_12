@@ -2,9 +2,21 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import fake_db
 from datetime import datetime
+import psycopg2
+
+from datetime import timedelta
+from decimal import Decimal
 
 app = Flask(__name__)
 CORS(app)
+db_params = {
+    'dbname': 'pdg_db',
+    'user': 'postgres',
+    'password': 'root',
+    'host': 'localhost',
+    'port': '5432'
+}
+
 
 def get_duration(timestamp_in, timestamp_out):
     if timestamp_in is None or timestamp_out is None:
@@ -23,102 +35,140 @@ def get_duration(timestamp_in, timestamp_out):
             raise ValueError("Timestamps must be datetime objects or ISO formatted strings")
         
         # Calculate the duration
-        return str(timestamp_out - timestamp_in)
+        duration = timestamp_out - timestamp_in
+        return duration
 
     except (ValueError, TypeError) as e:
         # Handle cases where timestamps are invalid or conversion fails
-        return str(e)
+        print(f"Error in duration calculation: {e}")
+        return None
+
+
+
 
 def get_fare_db(parking_name):
-    # Replace by an sql query
-    
-    if parking_name in fake_db.fake_price:
-        return fake_db.fake_price[parking_name]
-    else:
-        return None
-
-from datetime import timedelta
-from decimal import Decimal
-
-def get_amount(duration, parking_name):
-    if duration is None:
-        return None
-    
-    # Convert duration string to a timedelta object
+    """Retrieve fare from the database for a given parking name."""
+    conn = None
+    cursor = None
     try:
-        duration_parts = duration.split(":")
-        if len(duration_parts) == 3:
-            hours, minutes, seconds = map(int, duration_parts)
-            duration_td = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-        else:
-            raise ValueError("Invalid duration format")
+        cursor, conn = connect_to_db(db_params)
         
-        # Convert duration to hours in decimal form
-        duration_hours = duration_td.total_seconds() / 3600
+        query = "SELECT fare FROM parking_fares WHERE parking_name = %s;"
+        cursor.execute(query, (parking_name,))
+        fare_row = cursor.fetchone()
+
+        if fare_row is None:
+            return None
         
-        # Fetch the fare rate from the database and ensure it's a decimal
-        fare_rate = get_fare_db(parking_name)
-        if fare_rate is None:
-            raise ValueError("Parking name not found in database")
+        return fare_row[0]
+    
+    except Exception as e:
+        print(f"Error retrieving fare: {e}")
+        return None
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def calculate_duration_in_minutes(timestamp_in, timestamp_out):
+    if timestamp_in is None or timestamp_out is None:
+        return None
+    
+    try:
+        if isinstance(timestamp_in, str):
+            timestamp_in = datetime.fromisoformat(timestamp_in)
+        if isinstance(timestamp_out, str):
+            timestamp_out = datetime.fromisoformat(timestamp_out)
         
-        fare_rate = Decimal(fare_rate)
+        if not isinstance(timestamp_in, datetime) or not isinstance(timestamp_out, datetime):
+            raise ValueError("Timestamps must be datetime objects or ISO formatted strings")
         
-        return round(fare_rate * Decimal(duration_hours), 2)  # Round to 2 decimal places for currency formatting
+        duration = timestamp_out - timestamp_in
+        total_minutes = duration.total_seconds() / 60
+        return total_minutes
 
     except (ValueError, TypeError) as e:
-        # Handle errors during the conversion and calculation
-        return str(e)
+        print(f"Error in duration calculation: {e}")
+        return None
 
-"""
-def get_amount(duration, parking_name):
-    return duration * get_fare_db(parking_name)
-    hours = psl
-"""
+
+
+
+
+def get_amount(total_minutes, parking_name):
+    if total_minutes is None:
+        return None
+
+    fare = get_fare_db(parking_name)
+    if fare is None:
+        return None
+
+    amount = fare * total_minutes / 60
+    return f"{amount:.2f}"
+
+
+
+def connect_to_db(params):
+    try:
+        conn = psycopg2.connect(**params)
+        print("Connection successful")
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT version();")
+        db_version = cursor.fetchone()
+        #print(f"Database version: {db_version}")
+
+        return cursor, conn
+
+    except Exception as error:
+        print(f"Error connecting to the database: {error}")
+
+def close_connection_db(cursor, conn):
+        cursor.close()
+        conn.close()
+
 @app.route('/api/plate/<plate_no>', methods=['GET'])
 def get_plate(plate_no):
     """Handles requests to retrieve data based on the plate number."""
     conn = None
     try:
-        """
-        # Establish the database connection
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Define the SQL query to fetch data for the given plate number
-        query = "SELECT * FROM your_table WHERE plate_no = %s"
         
-        # Execute the query
+        cursor, conn = connect_to_db(db_params)
+        query = """
+        SELECT pl.parking_name AS parking, pl.timestamp_in AS in, pl.timestamp_out AS out
+        FROM parking_logs pl
+        INNER JOIN parking_fares pf ON pl.parking_name = pf.parking_name
+        WHERE pl.plate_number = %s
+        """
+
         cursor.execute(query, (plate_no,))
-        
-        # Fetch the result
-        result = cursor.fetchone()
-        """
-        result = fake_db.fake_plates[plate_no]
+        res = cursor.fetchall()
+        #print(f"{res}")
+        if not res: 
+            return jsonify({'error': 'Plate number not found'}), 404
 
-        result['duration'] = get_duration(result['timestamp_in'], result['timestamp_out'])
-        result['amount']   = get_amount(result['duration'], result['parking_name'])
+        column_names = [desc[0] for desc in cursor.description]
+        results_list = [dict(zip(column_names, row)) for row in res]
 
-        if result is None:
-            return jsonify({'error': 'Plate number not found'}), 204
+        # Format results with plate_number as the key
+        formatted_results = {plate_no: []}
+        for result in results_list:
+            total_minutes = calculate_duration_in_minutes(result['in'], result['out'])
+            amount = get_amount(total_minutes, result['parking'])
+            result['duration'] = f"{total_minutes if total_minutes is not None else None:.2f}"
+            result['amount'] = amount
+            formatted_results[plate_no].append(result)
 
-        # Define the column names (adjust according to your table structure)
-        #column_names = [desc[0] for desc in cursor.description]
-        
-        # Convert the result to a dictionary
-        #result_dict = dict(zip(column_names, result))
-
-        # Return the result as a JSON response
-        return jsonify(result), 200
+        return jsonify(formatted_results), 200
 
     except Exception as e:
-        # Handle any errors that occur during the database interaction
         return jsonify({'error': str(e)}), 500
 
     finally:
-        # Close the database connection
-        if conn:
-            conn.close()
-
+        close_connection_db(cursor, conn)
 
 
 
