@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_script:
-    runs-on: windows-latest
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -19,17 +19,19 @@ jobs:
           python-version: '3.11'
   
       - name: Install dependencies
-        working-directory: .\backend
+        working-directory: ./backend
         run: |
           python -m venv venv
-          venv\Scripts\activate
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip list
 
-      - name: Start PostgreSQL Container
+      - name: Pull PostgreSQL Image
+        run: docker pull jmuhlema/pdg:test
+        
+      - name: Run PostgreSQL Container
         run: |
-          docker pull jmuhlema/pdg:test
           docker run -d --name bdr-postgresql \
             -e POSTGRESQL_USERNAME=pdg \
             -e POSTGRESQL_PASSWORD=pdg \
@@ -40,12 +42,12 @@ jobs:
       - name: Wait for PostgreSQL to be ready
         run: |
           echo "Waiting for PostgreSQL to be ready..."
-          sleep 15
+          sleep 10
 
       - name: Run Python script and tests
-        working-directory: .\backend
+        working-directory: ./backend
         run: |
-          venv\Scripts\activate
+          source venv/bin/activate
           python app.py &  # Run the application in the background
           pytest
 
