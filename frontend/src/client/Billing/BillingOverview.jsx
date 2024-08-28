@@ -16,7 +16,7 @@ export default function BillingOverview() {
     useEffect(() => {
         if (client.value === "") navigate('/');
         if (!client.haveAccount)
-            APIGetRequest({url: 'localhost:5000/api/plate' + client.value, setData: setData, setStatus: setStatus});
+            APIGetRequest({url: 'http://localhost:5000/api/plate/' + client.value, setData: setData, setStatus: setStatus});
     }, [client.haveAccount, client.value, navigate]);
 
     /*useEffect(() => {
