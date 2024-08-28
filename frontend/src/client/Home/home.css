@@ -1,0 +1,91 @@
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: #E1ECF7; /* Light blue background color */
+    margin: 0;
+    padding: 0;
+}
+
+/* Container Styling for Home Page */
+div {
+    text-align: center;
+    padding: 20px;
+}
+
+/* Heading Styling */
+h1 {
+    color: #0872E3; /* Primary color for emphasis */
+    margin-bottom: 10px;
+}
+
+/* Paragraph Styling */
+p {
+    color: #333; /* Dark text color for readability */
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+/* SubmitForm Styling */
+.submit-form {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px; /* Set max-width for better layout */
+}
+
+/* Form Element Styling */
+.submit-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.submit-form textarea {
+    width: 100%;
+    height: 40px; /* Adjust height for line entry */
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.submit-form button {
+    background-color: #0872E3; /* Primary button color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.submit-form button:hover {
+    background-color: #0258B3; /* Darker shade for hover effect */
+}
+
+/* Navigation Styling */
+nav {
+    margin-top: 20px;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav li {
+    display: inline;
+    margin: 0 10px;
+}
+
+nav a {
+    color: #0872E3; /* Primary link color */
+    text-decoration: none;
+    font-size: 1em;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
