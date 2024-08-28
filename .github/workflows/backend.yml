@@ -49,6 +49,7 @@ jobs:
         run: |
           source venv/bin/activate
           python app.py &
+          sleep 10
           pytest
 
       - name: Stop and remove PostgreSQL Container
