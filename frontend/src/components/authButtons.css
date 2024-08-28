@@ -1,0 +1,45 @@
+/* AuthButtons.css */
+
+/* Container styling */
+.auth-buttons {
+    background-color: #ffffff; /* White background */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    padding: 15px; /* Reduced padding to make container slightly smaller */
+    max-width: 400px; /* Same max-width as form */
+    width: 100%; /* Full width up to max-width */
+    display: flex; /* Flexbox for layout */
+    gap: 15px; /* Reduced spacing between buttons */
+    justify-content: center; /* Center the buttons horizontally */
+    margin: 20px auto; /* Center the container on the page with some margin */
+}
+
+/* Button styling */
+.auth-buttons .btn {
+    padding: 8px 16px; /* Reduced padding for smaller buttons */
+    border-radius: 4px; /* Slightly rounded corners */
+    border: none; /* No border */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Log In Button */
+.auth-buttons .login-btn {
+    background-color: #007bff; /* Primary blue color to match form button */
+    color: #fff; /* White text */
+}
+
+.auth-buttons .login-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Sign Up Button */
+.auth-buttons .signup-btn {
+    background-color: #E1ECF7; /* Light blue background for contrast */
+    color: #007bff; /* Primary blue text color */
+}
+
+.auth-buttons .signup-btn:hover {
+    background-color: #bcd9f7; /* Slightly darker shade on hover */
+}
