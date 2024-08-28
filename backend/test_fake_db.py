@@ -25,6 +25,9 @@ def get_plate_data(plate_no):
         # Handle request errors
         print(f"Request error: {e}")
 
+""""
+Mock data to query the backend
+"""
 plate_numbers = [
    'VD12345',
    'QG13123',
@@ -33,8 +36,20 @@ plate_numbers = [
    'AG34567'
 ]
 
+ids = [12, 32, 54, 45]
+
+
+
+
+# Test cases for query a plate without login
+
 for plate_no in plate_numbers:
     get_plate_data(plate_no)
+
+
+# Test cases for query a user (id)
+for id in ids:
+    pass
 
 
 
