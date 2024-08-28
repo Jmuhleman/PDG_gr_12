@@ -9,4 +9,3 @@ data_ingest/*
 *.png
 *.mp4
 .idea
-frontend/package-lock.json
