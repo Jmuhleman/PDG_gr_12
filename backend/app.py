@@ -143,6 +143,10 @@ def get_plate(plate_no):
     finally:
         close_connection_db(cursor, conn)
 
+@app.route('/api/hello', methods=['GET'])
+def hello_world():
+    return jsonify(message="Hello, World!")
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port="5000", debug=True)
