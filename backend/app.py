@@ -111,7 +111,7 @@ def get_plate(plate_no):
 
         cursor, conn = connect_to_db(db_params)
         query = """
-        SELECT pl.parking_name AS parking, pl.timestamp_in AS in, pl.timestamp_out AS out
+        SELECT pl.parking_name AS parking, pl.timestamp_in, pl.timestamp_out
         FROM parking_logs pl
         INNER JOIN parking_fares pf ON pl.parking_name = pf.parking_name
         WHERE pl.plate_number = %s
@@ -129,7 +129,7 @@ def get_plate(plate_no):
         # Format results with plate_number as the key
         formatted_results = {plate_no: []}
         for result in results_list:
-            total_minutes = calculate_duration_in_minutes(result['in'], result['out'])
+            total_minutes = calculate_duration_in_minutes(result['timestamp_in'], result['timestamp_out'])
             amount = get_amount(total_minutes, result['parking'])
             result['duration'] = f"{total_minutes if total_minutes is not None else None:.2f}"
             result['amount'] = amount
