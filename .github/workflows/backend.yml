@@ -28,16 +28,16 @@ jobs:
           pip list
 
       - name: Pull PostgreSQL Image
-        run: docker pull jmuhlema/pdg:test
+        run: docker pull jmuhlema/postgresql:16
         
       - name: Run PostgreSQL Container
         run: |
-          docker run -d --name bdr-postgresql \
+          docker run -d --name pdg-postgresql \
             -e POSTGRESQL_USERNAME=pdg \
             -e POSTGRESQL_PASSWORD=pdg \
             -e POSTGRESQL_DATABASE=pdg_db \
             -e POSTGRESQL_POSTGRES_PASSWORD=root \
-            -p 5432:5432 jmuhlema/pdg:test
+            -p 5432:5432 jmuhlema/postgresql:16
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -48,11 +48,11 @@ jobs:
         working-directory: ./backend
         run: |
           source venv/bin/activate
-          python app.py &  # Run the application in the background
+          python app.py &
           pytest
 
       - name: Stop and remove PostgreSQL Container
         if: always()
         run: |
-          docker stop bdr-postgresql
-          docker rm bdr-postgresql
+          docker stop pdg-postgresql
+          docker rm pdg-postgresql
