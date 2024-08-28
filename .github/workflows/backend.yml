@@ -1,14 +1,9 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI_Python_module
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   pull_request:
     branches: [ "develop", "main" ]
-
-  workflow_dispatch:  # Allows you to manually trigger the workflow from the Actions tab
+  workflow_dispatch:
 
 jobs:
   test_script:
@@ -18,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: set up python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
@@ -32,9 +27,30 @@ jobs:
           pip install -r requirements.txt
           pip list
 
-      - name: Run Python script
+      - name: Start PostgreSQL Container
+        run: |
+          docker pull jmuhlema/pdg:test
+          docker run -d --name bdr-postgresql \
+            -e POSTGRESQL_USERNAME=pdg \
+            -e POSTGRESQL_PASSWORD=pdg \
+            -e POSTGRESQL_DATABASE=pdg_db \
+            -e POSTGRESQL_POSTGRES_PASSWORD=root \
+            -p 5432:5432 jmuhlema/pdg:test
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 15
+
+      - name: Run Python script and tests
         working-directory: .\backend
         run: |
           venv\Scripts\activate
-          Start-Process -FilePath python -ArgumentList "app.py" -NoNewWindow -PassThru | Out-Null
+          python app.py &  # Run the application in the background
           pytest
+
+      - name: Stop and remove PostgreSQL Container
+        if: always()
+        run: |
+          docker stop bdr-postgresql
+          docker rm bdr-postgresql
