@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test_script:
+  backend_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,9 +27,33 @@ jobs:
           pip install -r requirements.txt
           pip list
 
+      - name: Pull PostgreSQL Image
+        run: docker pull jmuhlema/postgresql:16
+        
+      - name: Run PostgreSQL Container
+        run: |
+          docker run -d --name pdg-postgresql \
+            -e POSTGRESQL_USERNAME=pdg \
+            -e POSTGRESQL_PASSWORD=pdg \
+            -e POSTGRESQL_DATABASE=pdg_db \
+            -e POSTGRESQL_POSTGRES_PASSWORD=root \
+            -p 5432:5432 jmuhlema/postgresql:16
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 10
+
       - name: Run Python script and tests
         working-directory: ./backend
         run: |
           source venv/bin/activate
           python app.py &
+          sleep 10
           pytest
+
+      - name: Stop and remove PostgreSQL Container
+        if: always()
+        run: |
+          docker stop pdg-postgresql
+          docker rm pdg-postgresql
