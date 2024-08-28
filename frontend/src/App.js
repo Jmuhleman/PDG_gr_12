@@ -1,26 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import './App.css'; // Ensure the path is correct
+import { ClientProvider } from './client/hooks/useClient';
+import BillingOverview from './client/Billing/BillingOverview';
+import HomePage from './client/Home/HomePage';
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <ClientProvider><Outlet /></ClientProvider>,
+        children: [
+            {
+                path: "/",
+                element: <HomePage />,
+            },
+            {
+                path: "billing_overview",
+                element: <BillingOverview />,
+            },
+        ],
+    },
+    {
+        path: "admin",
+        element: <h1>Admin</h1>,
+        children: [],
+    },
+]);
 
 function App() {
-  const [message, setMessage] = useState('Pas de message');
-  useEffect(() => {
-      axios.get('http://127.0.0.1:5000/api/hello')
-        .then(response => {
-              setMessage(response.data.message);
-          })
-          .catch(error => {
-              console.error('There was an error fetching the data!', error);
-          });
-  }, []);
-
-  return (
-      <div className="App">
-          <header className="App-header">
-              <h1>{message}</h1>
-          </header>
-      </div>
-  );
+    return (
+        <div className="App">
+            <header className="App-header">
+            </header>
+            <RouterProvider 
+                router={router} 
+                fallbackElement={<h1>404</h1>}
+            />
+        </div>
+    );
 }
 
 export default App;
