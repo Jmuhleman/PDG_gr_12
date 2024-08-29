@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { CookiesProvider } from 'react-cookie'
 import './App.css'; // Ensure the path is correct
 import { ClientProvider } from './client/hooks/useClient';
 import BillingOverview from './client/Billing/BillingOverview';
@@ -28,15 +29,19 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+
+
     return (
-        <div className="App">
-            <header className="App-header">
-            </header>
-            <RouterProvider 
-                router={router} 
-                fallbackElement={<h1>404</h1>}
-            />
-        </div>
+        <CookiesProvider>
+            <div className="App">
+                <header className="App-header">
+                </header>
+                <RouterProvider 
+                    router={router} 
+                    fallbackElement={<h1>404</h1>}
+                />
+            </div>
+        </CookiesProvider>
     );
 }
 

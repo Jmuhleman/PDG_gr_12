@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';  
 import Modal from '../../components/Modal';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css'
-
 
 function Home() {
     const PlateConfig = [
@@ -16,15 +16,18 @@ function Home() {
 
     const [showModal, setShowModal] = useState(false);
     const {setClient } = useClient();
+    // eslint-disable-next-line no-unused-vars
+    const [cookies, setCookie] = useCookies(['client']);
     const navigate = useNavigate();
     useEffect(() => {
         setClient({ value: "", haveAccount: false });
+        setCookie('client', { value: "", haveAccount: false }, { path: '/' });
     }, []);
 
     const handleSubmit = (formData) => {
        if(formData.plate === "") return;
-       setClient({value: formData.plate, haveAccount: false });
-       navigate('/billing_overview');
+        setCookie('client', {value: formdata.plate, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
+        navigate('/billing_overview');
     };
 
     const handleLogin = () => { setShowModal(true);
