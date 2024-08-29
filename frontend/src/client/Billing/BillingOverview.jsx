@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { APIGetRequest } from '../../utils/APIRequest';
+import { APIGetRequest, APIPostRequest } from '../../utils/APIRequest';
 import { useClient } from '../hooks/useClient';
 import { DateTime } from 'luxon';
 import { useCookies } from 'react-cookie'
+import {Elements} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
 import BillingSummary from './BillingSummary';
+import StripeCheckout from '../../components/StripeCheckout';
 import './billing.css'; 
+
+const stripePromise = loadStripe('pk_test_51Pt6wyRvF3tg1R6wz7YSiyG6z01KIUdvstXdu5CnjIwrAOkJkQZfKvzmOBiGuuVo2t8Tiv7xXPlD609PSShBjNuj00wmypaePA');
 
 export default function BillingOverview() {
     const [data, setData] = useState(undefined);
@@ -17,6 +22,8 @@ export default function BillingOverview() {
     const [showCheckout, setShowCheckout] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
 
+    const [stripeOptions, setStripeOptions] = useState({});
+
     const {client, setClient} = useClient();
 
     const navigate = useNavigate()
@@ -26,7 +33,7 @@ export default function BillingOverview() {
         if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
             APIGetRequest({url: 'http://localhost:5000/api/plate/' + client.value, setData: setData, setStatus: setStatus});
-    }, [client.haveAccount, client.value, navigate, cookies.client.value, setClient]);
+    }, [client.haveAccount, client.value, navigate, cookies.client, setClient]);
 
     useEffect(() => {
         if(data === undefined) return;
@@ -35,15 +42,21 @@ export default function BillingOverview() {
         // eslint-disable-next-line no-unused-vars
         setTotalAmount(fil2.map(([plate, info]) => info.map(({amount}) => parseFloat(amount)).reduce((acc, curr) => acc + curr, 0)).reduce((acc, curr) => acc + curr, 0))
         setSelectedBill(fil2);
-    }, [data, filter]);
+    }, [data, filter, cookies.client]);
+
+    async function getClientSecret(){
+        // Fetch client secret when data is available
+        await APIPostRequest({url: 'http://localhost:5000/api/create-payment-intent', data: {amount: totalAmount, currency: "CHF"}, setData: setStripeOptions, setStatus: setStatus});
+        console.log(stripeOptions);
+    }
 
     const handleOnClick = (value) => {
-        return () => {
+        return async () => {
             setFilter(value);
+            await getClientSecret();
             setShowCheckout(true);
         }
     }
-
 
     return (
         <div>
@@ -76,8 +89,7 @@ export default function BillingOverview() {
                 })
             }
             <button className='btn white-btn' onClick={() => navigate('/')}>Retour</button>
-            <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button>
-            { client.haveAccount && <button onClick={handleOnClick}>Payer Tout</button> }
+            { client.haveAccount && <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button>}
             
             { selectedBill && showCheckout && <div className="checkoutBackground"><div className="checkoutPanel">
                 <h1>Récapitulatif et paiment</h1>
@@ -99,9 +111,9 @@ export default function BillingOverview() {
                     }
                     <li className='totalCheckout'><p>Total</p><p>{totalAmount+".-"}</p></li>
                 </ul>
-                <div className="stripe">
-
-                </div>
+                <Elements stripe={stripePromise} options={stripeOptions}>
+                    <StripeCheckout />
+                </Elements>
                 <div className="checkoutButton">
                     <button className='btn white-btn' onClick={() => setShowCheckout(false)}>Annuler</button>
                 </div>

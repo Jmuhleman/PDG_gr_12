@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export function APIGetRequest({url, setData, setStatus}) {
-    axios.get(url).then(response => {
+export async function APIGetRequest({url, setData, setStatus}) {
+    await axios.get(url).then(response => {
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })
@@ -11,13 +11,14 @@ export function APIGetRequest({url, setData, setStatus}) {
     });
 }
 
-export function APIPostRequest({url, data, setData, setStatus}) {
-    axios.post(url, data).then(response => {
+export async function APIPostRequest({url, data, setData, setStatus}) {
+    await axios.post(url, data).then(response => {
+        console.log(response.data);
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })
     .catch(error => {
-        setStatus({code:error.response.status, text:error.response.statusText});
+        error.response && setStatus({code:error.response.status, text:error.response.statusText});
         console.error('There was an error fetching the data!', error);
     });
 }

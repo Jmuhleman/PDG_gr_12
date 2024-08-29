@@ -26,8 +26,8 @@ function Home() {
 
     const handleSubmit = (formData) => {
        if(formData.plate === "") return;
-        setCookie('client', {value: formdata.plate, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
-        navigate('/billing_overview');
+        setCookie('client', {value: formData.plate, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
+        navigate('/billingOverview');
     };
 
     const handleLogin = () => { setShowModal(true);
