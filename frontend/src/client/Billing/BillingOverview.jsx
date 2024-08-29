@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { APIGetRequest } from '../../utils/APIRequest';
 import { useClient } from '../hooks/useClient';
 import { DateTime } from 'luxon';
+import { useCookies } from 'react-cookie'
 import BillingSummary from './BillingSummary';
 import './billing.css'; 
 
@@ -10,20 +11,22 @@ export default function BillingOverview() {
     const [data, setData] = useState(undefined);
     const [selectedBill, setSelectedBill] = useState(undefined);
     const [status, setStatus] = useState(undefined);
+    const [cookies] = useCookies(['client']);
 
     const [filter, setFilter] = useState({plate: [], idBill: []});
     const [showCheckout, setShowCheckout] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
 
-    const {client} = useClient();
+    const {client, setClient} = useClient();
 
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (client.value === "") navigate('/');
+        setClient(cookies.client);
+        if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
             APIGetRequest({url: 'http://localhost:5000/api/plate/' + client.value, setData: setData, setStatus: setStatus});
-    }, [client.haveAccount, client.value, navigate]);
+    }, [client.haveAccount, client.value, navigate, cookies.client.value, setClient]);
 
     useEffect(() => {
         if(data === undefined) return;
@@ -31,7 +34,6 @@ export default function BillingOverview() {
         const fil2 = fil1.map(([plate, info]) => [plate, info.filter(({parking}) => filter.idBill.length === 0 ? true : filter.idBill.includes(parking))])
         // eslint-disable-next-line no-unused-vars
         setTotalAmount(fil2.map(([plate, info]) => info.map(({amount}) => parseFloat(amount)).reduce((acc, curr) => acc + curr, 0)).reduce((acc, curr) => acc + curr, 0))
-        console.log(filter, fil2)
         setSelectedBill(fil2);
     }, [data, filter]);
 

@@ -1,23 +1,27 @@
 import React, {useEffect} from 'react';
 import { Link } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';  
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css'
 
-
 function Home() {
     const {setClient } = useClient();
+    // eslint-disable-next-line no-unused-vars
+    const [cookies, setCookie] = useCookies(['client']);
     const navigate = useNavigate();
     useEffect(() => {
         setClient({ value: "", haveAccount: false });
+        setCookie('client', { value: "", haveAccount: false }, { path: '/' });
     }, []);
 
     const handleSubmit = (text) => {
         if(text === "") return;
         // Ensure setClient is used correctly. Assuming it expects an object with properties.
         setClient({value: text, haveAccount: false });
+        setCookie('client', {value: text, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
         navigate('/billing_overview');
     };
 
