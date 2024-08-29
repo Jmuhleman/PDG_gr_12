@@ -2,7 +2,7 @@
 import React from 'react';
 // import './Modal.css'; // Optional: for styling the modal
 
-const Modal = ({ show, onClose }) => {
+const Modal = ({ show, children}) => {
   if (!show) {
     return null;
   }
@@ -10,9 +10,7 @@ const Modal = ({ show, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <h2>Sign Up</h2>
-        <p>This is the Sign Up pop-up content!</p>
-        <button onClick={onClose}>Close</button>
+       {children}
       </div>
     </div>
   );

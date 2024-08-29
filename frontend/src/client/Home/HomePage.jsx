@@ -9,6 +9,11 @@ import './home.css'
 
 
 function Home() {
+    const PlateConfig = [
+        { id: 'plate', label: "Numéro de plaque : ", type: 'text', placeholder: "VD09815..." },
+      ];
+
+
     const [showModal, setShowModal] = useState(false);
     const {setClient } = useClient();
     const navigate = useNavigate();
@@ -16,11 +21,10 @@ function Home() {
         setClient({ value: "", haveAccount: false });
     }, []);
 
-    const handleSubmit = (text) => {
-        if(text === "") return;
-        // Ensure setClient is used correctly. Assuming it expects an object with properties.
-        setClient({value: text, haveAccount: false });
-        navigate('/billing_overview');
+    const handleSubmit = (formData) => {
+       if(formData.plate === "") return;
+       setClient({value: formData.plate, haveAccount: false });
+       navigate('/billing_overview');
     };
 
     const handleLogin = () => { setShowModal(true);
@@ -34,14 +38,18 @@ function Home() {
     
       // Function to handle the Sign Up button click
     const handleSignUp = () => {
-        Modal
+        
      
         // Add your sign up logic here, like showing a sign up form or redirecting
       };
 
     return (
         <div>
-            <Modal show={showModal} onClose={handleCloseModal} />
+            <Modal show={showModal}>
+                <h2>Sign down</h2>
+                <p>This is the Sign Up pop-up content!</p>
+                <button onClick={handleCloseModal}>Close</button>
+            </Modal >
             <AuthButtons
             buttonLogInText="Connexion"
             buttonSignUpText="Inscription"
@@ -50,13 +58,14 @@ function Home() {
             />
             <h1>Welcome to Our Website</h1>
             <p>This is the homepage where you can find an overview of our services and features.</p>
-           
-            <SubmitForm
+       
+            {!showModal && < SubmitForm 
                 label="Numéro de plaque : "
-                placeholder="VD09815..."
-                buttonText="Valider"
+
+                fieldsConfig={PlateConfig}
+               
                 onSubmit={handleSubmit}
-            />
+            />}
              <nav>
                 <ul>
                     <li><Link to="/billing_overview">Billing Overview</Link></li>
@@ -64,7 +73,7 @@ function Home() {
                 </ul>
             </nav>
          
-
+     
         </div>
     );
 }
