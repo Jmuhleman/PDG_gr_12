@@ -7,7 +7,9 @@ function SubmitForm({
   label = 'Your Information:',
   buttonText = 'Submit',
   onSubmit = () => {}, // Default to an empty function if no handler is provided
-  fieldsConfig = [] // Default to an empty array if no configuration is provided
+  fieldsConfig = [], // Default to an empty array if no configuration is provided
+  extraButton = null,
+  layout = 'single-column' // Default to single-column layout
 }) {
   // Initialize state with an object to manage multiple inputs
   const [formData, setFormData] = useState(
@@ -38,10 +40,12 @@ function SubmitForm({
           formData={formData}
           handleChange={handleChange}
           fieldsConfig={fieldsConfig}
+          layout={layout} // Pass layout prop
         />
         <button type="submit" className="submit-button">
           {buttonText}
         </button>
+        {extraButton && <div className="extra-button-container">{extraButton}</div>}
       </form>
     </div>
   );
@@ -51,14 +55,15 @@ SubmitForm.propTypes = {
   label: PropTypes.string,
   buttonText: PropTypes.string,
   onSubmit: PropTypes.func,
-  fieldsConfig: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      placeholder: PropTypes.string.isRequired,
-    })
-  ),
+  fieldsConfig: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    className: PropTypes.string // Optional className for custom styles
+  })).isRequired,
+  extraButon: PropTypes.element,
+  layout: PropTypes.oneOf(['single-column', 'two-column']) // Determine layout type
 };
 
 export default SubmitForm;
