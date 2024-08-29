@@ -3,15 +3,23 @@ import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';  
-import Modal from '../../components/Modal';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css'
 
 function Home() {
     const PlateConfig = [
-        { id: 'plate', label: "Numéro de plaque : ", type: 'text', placeholder: "VD09815..." },
+        { id: 'plate', label: "Numéro de plaque : ", type: 'text', placeholder: "VD09815..." }
       ];
+
+    const LoginConfig =[ 
+        { id: 'email', label: 'Email', type: 'email', placeholder: 'Enter your email' },
+        { id: 'password', label: 'Password', type: 'password', placeholder: 'Enter your password' }      
+    ];
+
+    const SignIn =[
+
+    ];
 
 
     const [showModal, setShowModal] = useState(false);
@@ -26,7 +34,7 @@ function Home() {
 
     const handleSubmit = (formData) => {
        if(formData.plate === "") return;
-        setCookie('client', {value: formdata.plate, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
+        setCookie('client', {value: formData.plate, haveAccount: false }, { path: '/', expires: new Date(Date.now() + 1000*3600*24*7) });
         navigate('/billing_overview');
     };
 
@@ -48,11 +56,6 @@ function Home() {
 
     return (
         <div>
-            <Modal show={showModal}>
-                <h2>Sign down</h2>
-                <p>This is the Sign Up pop-up content!</p>
-                <button onClick={handleCloseModal}>Close</button>
-            </Modal >
             <AuthButtons
             buttonLogInText="Connexion"
             buttonSignUpText="Inscription"
@@ -68,6 +71,12 @@ function Home() {
                 fieldsConfig={PlateConfig}
                
                 onSubmit={handleSubmit}
+            />}
+
+            {showModal && < SubmitForm 
+                label="Login : "
+                fieldsConfig={LoginConfig}
+                // onSubmit={handleLogin}
             />}
              <nav>
                 <ul>
