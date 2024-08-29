@@ -85,3 +85,8 @@ h2 {
     grid-column: span 1; /* Make address fields span both columns on large screens */
   }
 }
+.message {
+  color: red;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}

@@ -9,7 +9,8 @@ function SubmitForm({
   onSubmit = () => {}, // Default to an empty function if no handler is provided
   fieldsConfig = [], // Default to an empty array if no configuration is provided
   extraButton = null,
-  layout = 'single-column' // Default to single-column layout
+  layout = 'single-column', // Default to single-column layout
+  message = ""
 }) {
   // Initialize state with an object to manage multiple inputs
   const [formData, setFormData] = useState(
@@ -42,6 +43,7 @@ function SubmitForm({
           fieldsConfig={fieldsConfig}
           layout={layout} // Pass layout prop
         />
+        <p className='message'>{message}</p>
         <button type="submit" className="submit-button">
           {buttonText}
         </button>
@@ -62,8 +64,9 @@ SubmitForm.propTypes = {
     placeholder: PropTypes.string,
     className: PropTypes.string // Optional className for custom styles
   })).isRequired,
-  extraButon: PropTypes.element,
-  layout: PropTypes.oneOf(['single-column', 'two-column']) // Determine layout type
+  extraButton: PropTypes.element,
+  layout: PropTypes.oneOf(['single-column', 'two-column']), // Determine layout type
+  message: PropTypes.string
 };
 
 export default SubmitForm;

@@ -5,7 +5,9 @@ import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
+import argon2 from 'argon2';
 import './home.css';
+import { APIPostRequest } from '../../utils/APIRequest';
 
 function Home() {
   // Form field configurations
@@ -19,12 +21,13 @@ function Home() {
   ];
   
   const SignUpConfig = [
-    { id: 'name', label: "Nom :", type: 'text', placeholder: '' },
-    { id: 'surname', label: "Prénom :", type: 'text', placeholder: '' },
+    { id: 'lastname', label: "Nom :", type: 'text', placeholder: '' },
+    { id: 'firstname', label: "Prénom :", type: 'text', placeholder: '' },
     { id: 'street', label: "Rue :", type: 'text', placeholder: '' },
     { id: 'number', label: "Numéro :", type: 'text', placeholder: '', className: 'small' },
-    { id: 'prn', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
+    { id: 'zip', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
+    { id: 'country', label: "Pays :", type: 'text', placeholder: '', className: 'fill' },
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
     { id: 'password', label: "Mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
@@ -36,6 +39,10 @@ function Home() {
   // State management for showing forms
   const [showLogin, setShowLogin] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [signInStatus, setSignInStatus] = useState({code: 0, text: ""});
+  const [signUpStatus, setSignUpStatus] = useState({code: 0, text: ""});
+  const [signInData, setSignInData] = useState(undefined);
+  // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['client']);
   const { setClient } = useClient();
   const navigate = useNavigate();
@@ -80,14 +87,43 @@ function Home() {
     setShowLogin(false);
   };
 
-  const handleLogin = (formData) => {
+  const handleLogin = async ({email, password}) => {
+    const formData = {"email": email, "password": password};
     console.log('Login form submitted:', formData);
     // Add actual login logic here
+    await APIPostRequest({ url: 'http://localhost:5000/api/client', data: formData, setData: setSignInData, setStatus: setSignInStatus });
+    if(signInStatus.code === 200) {
+      setClient({ value: signInData.account, haveAccount: true });
+      setCookie('client', { value: signInData.account, haveAccount: true }, { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) });
+      navigate('/billing_overview');
+    }
   };
 
-  const handleSignUp = (formData) => {
+  const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
+    const hash = await argon2.hash(password);
+
+    const formData = {
+      "lastname": lastname,
+      "firstname": firstname,
+      "address": {
+          "street": street,
+          "number": number,
+          "city": town,
+          "zip": zip,
+          "country": country
+      },
+      "phone": phone,
+      "email": email,
+      "password": hash,
+      "plate": plate
+    }
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
+    await APIPostRequest({ url: 'http://localhost:5000/api/client', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
+    if(signUpStatus.code === 200) {
+      goHome();
+      setShowLogin(true);
+    }
   };
 
   return (
@@ -111,6 +147,7 @@ function Home() {
           fieldsConfig={LoginConfig}
           onSubmit={handleLogin}
           extraButton={ReturnButton}
+          message={(signInStatus && signInStatus.code != 200) ? signInStatus.text : ''}
         />
       )}
 
@@ -120,6 +157,7 @@ function Home() {
           fieldsConfig={SignUpConfig}
           onSubmit={handleSignUp}
           extraButton={ReturnButton}
+          message={(signUpStatus && signUpStatus.code != 200) ? signUpStatus.text : ''}
         />
       )}
 
