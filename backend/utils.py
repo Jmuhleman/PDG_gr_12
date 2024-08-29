@@ -2,7 +2,6 @@
 from datetime import datetime
 import psycopg2
 
-
 db_params = {
     'dbname': 'pdg_db',
     'user': 'postgres',
@@ -11,6 +10,54 @@ db_params = {
     'port': '5432'
 }
 
+def enumerate_fields(user, fields, fields_address):
+    """Extract customer fields according to headers as a dictionary"""
+    user_dict = {}
+
+    for i, field in enumerate(fields):
+        if field == 'address':
+            user_dict['address'] = {fields_address[j]: user[3][j] for j in range(len(fields_address))}
+        else:
+            user_dict[field] = user[i]
+    return user_dict
+
+
+def format_user(user_data):
+    """Format single or multi-user information"""
+
+    fields = ['id', 'lastname', 'firstname', 'address', 'phone', 'email', 'password', 'plates']
+    fields_address = ['street', 'number', 'city', 'zip', 'country']
+    if isinstance(user_data, tuple):
+        usr_list = enumerate_fields(user_data, fields, fields_address)
+    else:
+        print('list')
+        usr_list = []
+        for user in user_data:
+            usr_dict = enumerate_fields(user, fields, fields_address)
+            usr_list.append(usr_dict)
+    return usr_list
+
+
+def verify_fields(data):
+    """Check that all fields of a dictionary are not None values"""
+    for key, value in data.items():
+        if value is None:
+            return False
+        if isinstance(value, dict):
+            if not verify_fields(value):
+                return False
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    if not verify_fields(item):
+                        return False
+                elif item is None:
+                    return False
+        else:
+            if value is None:
+                print(f"Field '{key}' is missing.")
+                return False
+    return True
 
 
 def get_fare_db(parking_name):
@@ -20,7 +67,12 @@ def get_fare_db(parking_name):
     try:
         cursor, conn = connect_to_db(db_params)
 
-        query = "SELECT fare FROM parking_fares WHERE parking_name = %s;"
+        query = """
+        SELECT fare
+        FROM fares
+        INNER JOIN parking ON fares.parking_id = parking.id
+        WHERE parking.name = %s;
+        """
         cursor.execute(query, (parking_name,))
         fare_row = cursor.fetchone()
 
