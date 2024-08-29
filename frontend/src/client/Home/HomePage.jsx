@@ -1,13 +1,15 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
 import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';  
+import Modal from '../../components/Modal';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css'
 
 
 function Home() {
+    const [showModal, setShowModal] = useState(false);
     const {setClient } = useClient();
     const navigate = useNavigate();
     useEffect(() => {
@@ -21,19 +23,25 @@ function Home() {
         navigate('/billing_overview');
     };
 
-    const handleLogin = () => {
+    const handleLogin = () => { setShowModal(true);
   
         // Add your log in logic here, like showing a log in form or redirecting
       };
+
+      const handleCloseModal = () => {
+        setShowModal(false);
+      }
     
       // Function to handle the Sign Up button click
     const handleSignUp = () => {
+        Modal
      
         // Add your sign up logic here, like showing a sign up form or redirecting
       };
 
     return (
         <div>
+            <Modal show={showModal} onClose={handleCloseModal} />
             <AuthButtons
             buttonLogInText="Connexion"
             buttonSignUpText="Inscription"
