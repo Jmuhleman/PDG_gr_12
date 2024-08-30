@@ -1,46 +1,92 @@
+/* Form container styling */
+.container {
+  max-width: 1200px; /* Increase max-width for better layout on larger screens */
+  margin: 0 auto; /* Center the container horizontally */
+  padding: 5px; /* Padding inside the container */
+}
+
 /* Form styling */
-.submit-form {
-    background-color: #ffffff; /* White background */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    padding: 20px; /* Padding inside the form */
-    max-width: 400px; /* Maximum width */
-    width: 100%; /* Full width up to max-width */
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
+form {
+  display: grid; /* Use grid layout */
+  gap: 5px; /* Space between grid items */
+  grid-template-columns: 1fr; /* Default to single column layout */
+}
+
+/* Title styling */
+h2 {
+  grid-column: span 1; /* Span across single column by default */
+  color: #0872E3; /* Primary color */
+  margin-bottom: 20px; /* Margin below the title */
+}
+
+/* Label styling */
+.form-label {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+/* Input field styling */
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #0872E3;
+  outline: none;
+  box-shadow: 0 0 5px rgba(8, 114, 227, 0.2);
+}
+
+/* Button styling */
+.submit-button, .extra-button {
+  background-color: #0872E3;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  grid-column: span 1; /* Span across single column by default */
+  margin-top: 10px;
+  width: 100%; /* Make sure buttons take full width */
+  max-width: 200px; /* Control max width if needed */
+  box-sizing: border-box; /* Ensure padding/border are included in width */
+}
+
+.submit-button:hover, .extra-button:hover {
+  background-color: #0258B3;
+  transform: translateY(-2px);
+}
+
+.submit-button:active, .extra-button:active {
+  background-color: #014a8a;
+  transform: translateY(0);
+}
+
+/* Two-column layout for larger screens */
+@media (min-width: 768px) {
+  form {
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
   }
-  
-  /* Label styling */
-  .form-label {
-    font-size: 1rem;
-    margin-bottom: 10px; /* Space below the label */
-    color: #333; /* Dark grey color for text */
-  }
-  
-  /* Input styling */
+
   .form-input {
-    width: 100%; /* Full width */
-    padding: 10px; /* Padding inside the input */
-    border: 1px solid #ccc; /* Light grey border */
-    border-radius: 4px; /* Slightly rounded corners */
-    font-size: 1rem; /* Font size */
-    margin-bottom: 20px; /* Space below the input */
+    width: auto; /* Adjust width for grid items */
   }
-  
-  /* Button styling */
-  .submit-button {
-    background-color: #007bff; /* Primary blue color */
-    color: #fff; /* White text color */
-    border: none; /* Remove default border */
-    padding: 10px 20px; /* Padding inside the button */
-    border-radius: 4px; /* Slightly rounded corners */
-    font-size: 1rem; /* Font size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease; /* Smooth background color transition */
-    align-self: flex-start; /* Align button to the start of the form */
+
+  /* Specific styling for address fields */
+  .form-input.address {
+    grid-column: span 1; /* Make address fields span both columns on large screens */
   }
-  
-  /* Button hover effect */
-  .submit-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-  }
+}
+.message {
+  color: red;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}

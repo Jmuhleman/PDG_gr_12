@@ -1,47 +1,72 @@
-import React, { useState } from "react";
-import PropTypes from 'prop-types'; 
-import './submitForm.css'
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+import './submitForm.css';
+import InputFields from './InputFields'; // Import the InputFields component
 
 function SubmitForm({
-  label = "Your Information:",
-  placeholder = "Enter some text...",
-  buttonText = "Submit",
+  label = 'Your Information:',
+  buttonText = 'Submit',
   onSubmit = () => {}, // Default to an empty function if no handler is provided
+  fieldsConfig = [], // Default to an empty array if no configuration is provided
+  extraButton = null,
+  layout = 'single-column', // Default to single-column layout
+  message = ""
 }) {
-  const [text, setText] = useState(''); // Initialize with an empty string
+  // Initialize state with an object to manage multiple inputs
+  const [formData, setFormData] = useState(
+    fieldsConfig.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {})
+  );
 
+  // Update state based on input field name
   const handleChange = (event) => {
-    setText(event.target.value);
+    const { name, value } = event.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
+  // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-    onSubmit(text); // Call the custom submit handler with the current text
+    onSubmit(formData); // Call the custom submit handler with the current form data
   };
 
   return (
     <div className="container">
       <form onSubmit={handleSubmit}>
-        <label htmlFor="form-input">{label}</label>
-        <input
-          id="form-input"
-          className="form-input"
-          type="text"  // Use <input> for a single line of text, not <form>
-          value={text}
-          onChange={handleChange}
-          placeholder={placeholder}
+        <h2>{label}</h2>
+        {/* Use the InputFields component and pass necessary props */}
+        <InputFields
+          formData={formData}
+          handleChange={handleChange}
+          fieldsConfig={fieldsConfig}
+          layout={layout} // Pass layout prop
         />
-        <br />
-        <button type="submit" className="submit-button">{buttonText}</button>
+        <p className='message'>{message}</p>
+        <button type="submit" className="submit-button">
+          {buttonText}
+        </button>
+        {extraButton && <div className="extra-button-container">{extraButton}</div>}
       </form>
     </div>
   );
 }
+
 SubmitForm.propTypes = {
   label: PropTypes.string,
-  placeholder: PropTypes.string,
   buttonText: PropTypes.string,
   onSubmit: PropTypes.func,
+  fieldsConfig: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    className: PropTypes.string // Optional className for custom styles
+  })).isRequired,
+  extraButton: PropTypes.element,
+  layout: PropTypes.oneOf(['single-column', 'two-column']), // Determine layout type
+  message: PropTypes.string
 };
 
 export default SubmitForm;

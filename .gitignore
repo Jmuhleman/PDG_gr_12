@@ -1,4 +1,7 @@
 backend/venv/
+__pycache__/
+backend/__pycache__/
+backend/test/__pycache__/
 frontend/node_modules/
 frontend/build/
 *.csv
@@ -6,4 +9,3 @@ data_ingest/*
 *.png
 *.mp4
 .idea
-frontend/package-lock.json
