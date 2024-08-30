@@ -1,106 +1,163 @@
 from datetime import datetime
-
-import psycopg2
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-
+import utils
 
 app = Flask(__name__)
 CORS(app)
 
-db_params = {
-    'dbname': 'pdg_db',
-    'user': 'postgres',
-    'password': 'root',
-    'host': 'localhost',
-    'port': '5432'
-}
 
+@app.route('/api/users/', methods=['GET'])
+def get_users():
+    """Handles requests to retrieve all users"""
 
-def get_fare_db(parking_name):
-    """Retrieve fare from the database for a given parking name."""
-    conn = None
-    cursor = None
     try:
-        cursor, conn = connect_to_db(db_params)
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+        SELECT
+            id,
+            lastname,
+            firstname,
+            ARRAY[street, number, city, zip, country] AS address,
+            phone,
+            email,
+            password,
+            ARRAY_AGG(plate ORDER BY plate) AS plates
+        FROM
+            customers
+            INNER JOIN plate_numbers ON id = customer_id
+        GROUP BY
+            id, lastname, firstname, street, number, city, zip, country, phone, email, password;
+        """
+        cursor.execute(query)
+        user_data = cursor.fetchall()
+        
+        if user_data is None:
+            return jsonify({'status': 'No users found'}), 404
 
-        query = "SELECT fare FROM parking_fares WHERE parking_name = %s;"
-        cursor.execute(query, (parking_name,))
-        fare_row = cursor.fetchone()
+        user_dict = utils.format_user(user_data)
 
-        if fare_row is None:
-            return None
+        return jsonify(user_dict), 200
+    
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
 
-        return fare_row[0]
+
+@app.route('/api/user/<id>', methods=['GET'])
+def get_user(id):
+    """Handles requests to retrieve user data based on the user ID."""
+
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+        SELECT
+            id,
+            lastname,
+            firstname,
+            ARRAY[street, number, city, zip, country] AS address,
+            phone,
+            email,
+            password,
+            ARRAY_AGG(plate ORDER BY plate) AS plates
+        FROM
+            customers
+            INNER JOIN plate_numbers ON id = customer_id
+        WHERE
+            id = %s
+        GROUP BY
+            id,lastname, firstname, street, number, city, zip, country, phone, email, password;
+        """
+        cursor.execute(query, (id,))
+        user_data = cursor.fetchone()
+
+        if user_data is None:
+            return jsonify({'status': 'User ID not found'}), 404
+
+        user_dict = utils.format_user(user_data)
+
+        return jsonify(user_dict), 200
+    
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/sign_in/', methods=['POST'])
+def set_user():
+    """Handles requests to subscribe user data in the DB."""
+    data = request.get_json()
+
+    try:
+
+        if not utils.verify_fields(data):
+            return jsonify({'status': 'Fields not valid'}), 400
+        
+        # Connexion à la base de données
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        
+        # vérification de l'unicité de l'email
+        query_email = """
+        SELECT email
+        FROM customers
+        """
+        cursor.execute(query_email)
+        email_ret = cursor.fetchall()
+        emails = {row[0] for row in email_ret}
+        if data['email'] in emails:
+            return jsonify({'status': 'Email already exists'}), 403
+              
+        # vérification de l'unicité de la plaque
+        query_plate = """
+        SELECT plate
+        FROM plate_numbers
+        """
+        cursor.execute(query_plate)
+        plate_ret = cursor.fetchall()
+
+        plates = {row[0] for row in plate_ret}
+
+        if data['plate'] in plates:
+            return jsonify({'status': 'Plate already exists'}), 403
+
+        # insertion dans BD
+        query_customer = """
+        INSERT INTO customers (firstname, lastname, street, number, city, zip, country, phone, email, password)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id;
+        """
+
+        cursor.execute(query_customer, (
+            data['firstname'], data['lastname'], data['address']['street'], data['address']['number'], 
+            data['address']['city'], data['address']['zip'], data['address']['country'], data['phone'], 
+            data['email'], data['password']
+        ))
+
+        # Récupération de l'ID du client inséré
+        customer_id = cursor.fetchone()[0]
+
+        # Insertion des numéros de plaque dans la table plate_numbers
+        query_plate = """
+        INSERT INTO plate_numbers (plate, customer_id)
+        VALUES (%s, %s);
+        """
+        
+        cursor.execute(query_plate, (data['plate'], customer_id))
+
+        # Commit pour sauvegarder les modifications
+        conn.commit()
+
+        return jsonify({'status': 'User created successfully', 'user_id': customer_id}), 201
 
     except Exception as e:
-        print(f"Error retrieving fare: {e}")
-        return None
+        if conn:
+            conn.rollback()  # En cas d'erreur, on annule les modifications
+        return jsonify({'status': str(e)}), 500
 
     finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
-
-def calculate_duration_in_minutes(timestamp_in, timestamp_out):
-    """Compute duration and convert the amount in minutes"""
-    if timestamp_in is None or timestamp_out is None:
-        return None
-
-    try:
-        if isinstance(timestamp_in, str):
-            timestamp_in = datetime.fromisoformat(timestamp_in)
-        if isinstance(timestamp_out, str):
-            timestamp_out = datetime.fromisoformat(timestamp_out)
-
-        if not isinstance(timestamp_in, datetime) or not isinstance(timestamp_out, datetime):
-            raise ValueError("Timestamps must be datetime objects or ISO formatted strings")
-
-        duration = timestamp_out - timestamp_in
-        total_minutes = duration.total_seconds() / 60
-        return total_minutes
-
-    except (ValueError, TypeError) as e:
-        print(f"Error in duration calculation: {e}")
-        return None
-
-
-def get_amount(total_minutes, parking_name):
-    """Compute total amount to be paid by customer for a given stay"""
-    if total_minutes is None:
-        return None
-
-    fare = get_fare_db(parking_name)
-    if fare is None:
-        return None
-    # as we store fares per hours
-    amount = fare * total_minutes / 60
-    return f"{amount:.2f}"
-
-
-def connect_to_db(params):
-    """Establish connection to DB and return pointer to socket"""
-    try:
-        conn = psycopg2.connect(**params)
-        print("Connection successful")
-        cursor = conn.cursor()
-
-        # cursor.execute("SELECT version();")
-        # db_version = cursor.fetchone()
-        # print(f"Database version: {db_version}")
-
-        return cursor, conn
-
-    except Exception as error:
-        print(f"Error connecting to the database: {error}")
-
-
-def close_connection_db(cursor, conn):
-    """Cut off connection to DB"""
-    cursor.close()
-    conn.close()
+        utils.close_connection_db(cursor, conn)
 
 
 @app.route('/api/plate/<plate_no>', methods=['GET'])
@@ -109,17 +166,16 @@ def get_plate(plate_no):
     conn = None
     try:
 
-        cursor, conn = connect_to_db(db_params)
+        cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
-        SELECT pl.parking_name AS parking, pl.timestamp_in, pl.timestamp_out
-        FROM parking_logs pl
-        INNER JOIN parking_fares pf ON pl.parking_name = pf.parking_name
-        WHERE pl.plate_number = %s
+        SELECT logs.id AS id, name AS parking, timestamp_in, timestamp_out
+        FROM logs
+        INNER JOIN parking ON logs.parking_id = parking.id
+        WHERE plate = %s;
         """
-
         cursor.execute(query, (plate_no,))
         res = cursor.fetchall()
-        # print(f"{res}")
+
         if not res:
             return jsonify({'status': 'Plate number not found'}), 404
 
@@ -129,19 +185,23 @@ def get_plate(plate_no):
         # Format results with plate_number as the key
         formatted_results = {plate_no: []}
         for result in results_list:
-            total_minutes = calculate_duration_in_minutes(result['timestamp_in'], result['timestamp_out'])
-            amount = get_amount(total_minutes, result['parking'])
+            total_minutes = utils.calculate_duration_in_minutes(result['timestamp_in'], result['timestamp_out'])
+            amount = utils.get_amount(total_minutes, result['parking'])
             result['duration'] = f"{total_minutes if total_minutes is not None else None:.2f}"
             result['amount'] = amount
             formatted_results[plate_no].append(result)
 
+### a voir avec la team frontend si renvoyer l'ID ici ou le placer dans les données de retour
         return jsonify(formatted_results), 200
 
     except Exception as e:
         return jsonify({'status': str(e)}), 500
 
     finally:
-        close_connection_db(cursor, conn)
+        utils.close_connection_db(cursor, conn)
+
+
+
 
 @app.route('/api/hello', methods=['GET'])
 def hello_world():
