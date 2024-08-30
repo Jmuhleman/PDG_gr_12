@@ -1,0 +1,128 @@
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: #E1ECF7; /* Light blue background color */
+    margin: 0;
+    padding: 0;
+}
+
+/* Container Styling for Home Page */
+.container {
+    text-align: center;
+    padding: 20px;
+    max-width: 100%; /* Full width for mobile */
+}
+
+/* Heading Styling */
+h1 {
+    color: #0872E3; /* Primary color for emphasis */
+    margin-bottom: 10px;
+    font-size: 1.5em; /* Smaller font size for mobile */
+}
+
+/* Paragraph Styling */
+p {
+    color: #333; /* Dark text color for readability */
+    margin-bottom: 20px;
+    font-size: 1em; /* Adjust font size for better readability on mobile */
+}
+
+/* SubmitForm Styling */
+.submit-form {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%; /* Full width on mobile */
+    width: 90%; /* Slight padding from screen edges */
+}
+
+/* Form Element Styling */
+.submit-form label {
+    display: block;
+    margin-bottom: 5px; /* Reduced margin for better spacing on mobile */
+    font-weight: bold;
+    text-align: left; /* Align labels to the left */
+}
+
+.submit-form input, 
+.submit-form textarea {
+    width: 100%;
+    height: 40px; /* Adjust height for line entry */
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+/* Button Styling */
+.submit-form button {
+    background-color: #0872E3; /* Primary button color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    width: 100%; /* Full width for mobile */
+    margin-top: 10px; /* Add space above the button */
+}
+
+.submit-form button:hover {
+    background-color: #0258B3; /* Darker shade for hover effect */
+}
+
+/* Navigation Styling */
+nav {
+    margin-top: 20px;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Center navigation items */
+    flex-wrap: wrap; /* Allow wrapping of items for better mobile experience */
+}
+
+nav li {
+    margin: 5px; /* Spacing between navigation items */
+}
+
+nav a {
+    color: #0872E3; /* Primary link color */
+    text-decoration: none;
+    font-size: 0.9em; /* Adjust font size for mobile */
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Media Query for Tablets and Larger Screens */
+@media (min-width: 768px) {
+    .container {
+        max-width: 700px; /* Limit width on larger screens */
+    }
+
+    h1 {
+        font-size: 2em; /* Increase heading size */
+    }
+
+    .submit-form {
+        max-width: 500px; /* Restrict form width */
+    }
+
+    /* Adjust form fields to be side by side where applicable */
+    .submit-form .form-field-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Two columns */
+        gap: 15px; /* Add spacing between fields */
+    }
+
+    .submit-form .form-field.full-width {
+        grid-column: span 2; /* Full width fields span both columns */
+    }
+}
