@@ -1,66 +1,13 @@
-from urllib import response
 import requests
 
-base_url = 'http://127.0.0.1:5000/api/plate/'
+def test_api():
+    url = "http://localhost:5000/api/hello"
+    response = requests.get(url)
 
-def get_plate_data(plate_no):
-    """Send a GET request to retrieve data for a given plate number."""
-    url = f"{base_url}{plate_no}"
-    
-    try:
-        response = requests.get(url)
-        data = response.json()
-
-        if response.status_code == 200:
-            # Successful response
-            print(data)
-        elif response.status_code == 404:
-            print(data.get('error', 'Unknown error'))
-
-        else:
-            # Other errors
-            print(f"{response.status_code} - {response.text}")
-    
-    except requests.RequestException as e:
-        # Handle request errors
-        print(f"Request error: {e}")
-
-
-####################
-""""
-Mock data to query the backend
-"""
-plate_numbers = [
-   'VD12345',
-   'QG13123',
-   'VD12345',
-   'GE67890',
-   'AG34567'
-]
-ids = [12, 32, 54, 45]
-
-
-#####################
-
-# Test cases for query a plate without login
-for plate_no in plate_numbers:
-    get_plate_data(plate_no)
+    # Assert the response status code
     assert response.status_code == 200
 
     # Assert the response content
     assert response.json() == {'message': 'Hello, World!'}
 
-
-# Test cases for query a user (id)
-for id in ids:
-    pass
-
-
-
-
-
-
-
-
-
-
+test_api()
