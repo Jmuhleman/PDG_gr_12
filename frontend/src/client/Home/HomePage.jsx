@@ -5,7 +5,6 @@ import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
-import argon2 from 'argon2';
 import './home.css';
 import { APIPostRequest } from '../../utils/APIRequest';
 
@@ -91,8 +90,8 @@ function Home() {
     const formData = {"email": email, "password": password};
     console.log('Login form submitted:', formData);
     // Add actual login logic here
-    await APIPostRequest({ url: 'http://localhost:5000/api/client', data: formData, setData: setSignInData, setStatus: setSignInStatus });
-    if(signInStatus.code === 200) {
+    await APIPostRequest({ url: 'http://localhost:5000/api/sing_in', data: formData, setData: setSignInData, setStatus: setSignInStatus });
+    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
       setClient({ value: signInData.account, haveAccount: true });
       setCookie('client', { value: signInData.account, haveAccount: true }, { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) });
       navigate('/billing_overview');
@@ -100,7 +99,7 @@ function Home() {
   };
 
   const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
-    const hash = await argon2.hash(password);
+    //const hash = await argon2.hash(password);
 
     const formData = {
       "lastname": lastname,
@@ -114,13 +113,13 @@ function Home() {
       },
       "phone": phone,
       "email": email,
-      "password": hash,
+      "password": password,
       "plate": plate
     }
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
-    await APIPostRequest({ url: 'http://localhost:5000/api/client', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
-    if(signUpStatus.code === 200) {
+    await APIPostRequest({ url: 'http://localhost:5000/api/sign_up/', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
+    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
       goHome();
       setShowLogin(true);
     }
@@ -147,7 +146,7 @@ function Home() {
           fieldsConfig={LoginConfig}
           onSubmit={handleLogin}
           extraButton={ReturnButton}
-          message={(signInStatus && signInStatus.code != 200) ? signInStatus.text : ''}
+          message={(signInStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signInStatus.text : ''}
         />
       )}
 
@@ -157,7 +156,7 @@ function Home() {
           fieldsConfig={SignUpConfig}
           onSubmit={handleSignUp}
           extraButton={ReturnButton}
-          message={(signUpStatus && signUpStatus.code != 200) ? signUpStatus.text : ''}
+          message={(signUpStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signUpStatus.text : ''}
         />
       )}
 

@@ -45,7 +45,7 @@ def get_users():
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/user/<id>', methods=['GET'])
+@app.route('/api/users/<id>', methods=['GET'])
 def get_user(id):
     """Handles requests to retrieve user data based on the user ID."""
 
@@ -85,7 +85,7 @@ def get_user(id):
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/sign_in/', methods=['POST'])
+@app.route('/api/sign_up/', methods=['POST'])
 def set_user():
     """Handles requests to subscribe user data in the DB."""
     data = request.get_json()
