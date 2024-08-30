@@ -1,50 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './inputFields.css'; // Import the CSS for input fields
 
-// The InputFields component receives formData, handleChange, and fieldsConfig as props
 function InputFields({ formData, handleChange, fieldsConfig }) {
   return (
-    <>
-      {fieldsConfig.map((field) => (
-        <div key={field.id} className="input-group">
-          <label htmlFor={field.id}>{field.label}</label>
-          {field.type === 'textarea' ? (
-            <textarea
-              id={field.id}
-              className="form-input"
-              name={field.id}
-              value={formData[field.id]}
-              onChange={handleChange}
-              placeholder={field.placeholder}
-            />
-          ) : (
-            <input
-              id={field.id}
-              className="form-input"
-              type={field.type}
-              name={field.id}
-              value={formData[field.id]}
-              onChange={handleChange}
-              placeholder={field.placeholder}
-            />
-          )}
+    <div className="form-field-container">
+      {fieldsConfig.map(({ id, label, type, placeholder, className }) => (
+        <div key={id} className={`form-field ${className || ''}`}>
+          <label htmlFor={id} className="form-label">{label}</label>
+          <input
+            id={id}
+            name={id}
+            type={type}
+            placeholder={placeholder}
+            value={formData[id] || ''}
+            onChange={handleChange}
+            className="form-input"
+          />
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
 InputFields.propTypes = {
-  formData: PropTypes.object.isRequired, // formData object containing values of inputs
-  handleChange: PropTypes.func.isRequired, // function to handle changes to inputs
-  fieldsConfig: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      placeholder: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  formData: PropTypes.object.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  fieldsConfig: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    className: PropTypes.string // Optional className for custom styles
+  })).isRequired
 };
 
 export default InputFields;
