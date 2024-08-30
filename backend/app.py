@@ -2,12 +2,13 @@ from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import utils
+import stripe
 
 app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/api/users/', methods=['GET'])
+@app.route('/api/users', methods=['GET'])
 def get_users():
     """Handles requests to retrieve all users"""
 
@@ -85,7 +86,7 @@ def get_user(id):
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/sign_up/', methods=['POST'])
+@app.route('/api/sign_up', methods=['POST'])
 def set_user():
     """Handles requests to subscribe user data in the DB."""
     data = request.get_json()
@@ -200,8 +201,48 @@ def get_plate(plate_no):
     finally:
         utils.close_connection_db(cursor, conn)
 
+pendingIntent = {}
+stripe.api_key = "sk_test_51Pt6wyRvF3tg1R6w1sVcUO1Gfbgc2wJ8Wt5Q9zCyf4c0fg1Aa3EoSpRE6y0CmZGdtTFAqjCLuaCdv7vuQno2aTRF00d1TgZ1wv"
 
+@app.route('/api/create_payment_intent', methods=['POST'])
+def async_create_payment_intent():
+    data = request.json
+    amount = data['amount']
+    currency = data['currency']
+    tickets = data['ticket_id']
+    print(tickets)
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),  # amount should be in cents
+            currency=currency
+        )
+        pendingIntent[payment_intent['client_secret']] = tickets
+        return {"clientSecret": payment_intent['client_secret']}, 200
+    except Exception as e:
+        print(e);
+        return jsonify({'status': str(e)}), 500
+    
+@app.route('/api/finish_payment_intent', methods=['POST'])
+def finish_payment_intent():
+    try:
+        data = request.json
+        payment_intent = data['payment_intent']
+        client_secret = data['payment_intent_client_secret']
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent)
+        if(payment_intent['status'] != 'succeeded'):
+            return {"status": "failed"}, 400
+        #pendingIntent[client_secret] = [3]
+        tickets = pendingIntent[client_secret]
 
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        ftickets = '('+str(tickets[0])+')' if len(tickets) == 1 else tuple(tickets)
+        query = "DELETE FROM logs WHERE id IN " + ftickets + ";"
+        cursor.execute(query)
+        conn.commit()
+        return {"status": "success"}, 200
+    except Exception as e:
+        print(e);
+        return jsonify({'status': str(e)}), 500
 
 @app.route('/api/hello', methods=['GET'])
 def hello_world():

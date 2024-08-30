@@ -21,6 +21,7 @@ export default function BillingOverview() {
     const [filter, setFilter] = useState({plate: [], idBill: []});
     const [showCheckout, setShowCheckout] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [loadIntent, setLoadIntent] = useState(false);
 
     const [stripeOptions, setStripeOptions] = useState({});
 
@@ -29,14 +30,14 @@ export default function BillingOverview() {
 
     const navigate = useNavigate()
 
-    const showstatus = (e) => e;//console.log(e);
+    const showstatus = (e) => e;
     const handleSetProfile = (data) => {
         setProfile(data);
     }
 
     async function getProfileAndPlate() {
         await APIGetRequest({
-            url: 'http://localhost:5000/api/users/' + client.value,
+            url: `http://localhost:5000/api/users/${client.value}`,
             setData: handleSetProfile,
             setStatus: showstatus
         });
@@ -46,7 +47,7 @@ export default function BillingOverview() {
         setClient(cookies.client);
         if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
-            APIGetRequest({url: 'http://localhost:5000/api/plate/' + client.value, setData: setData, setStatus: setStatus});
+            APIGetRequest({url: `http://localhost:5000/api/plate/${client.value}`, setData: setData, setStatus: setStatus});
         else if(client.haveAccount && cookies.client.value !== ""){
             getProfileAndPlate();
         }
@@ -61,7 +62,7 @@ export default function BillingOverview() {
                 await Promise.all(
                     profile.plates.map(async (plate) => {
                         await APIGetRequest({
-                            url: 'http://localhost:5000/api/plate/' + plate,
+                            url: `http://localhost:5000/api/users/${plate}`,
                             setData: assignPlate,
                             setStatus: showstatus
                         });
@@ -84,17 +85,23 @@ export default function BillingOverview() {
         setSelectedBill(fil2);
     }, [data, filter, cookies.client]);
 
+    useEffect(() => {
+        if(loadIntent)
+            getClientSecret();
+    }, [selectedBill]);
+
     async function getClientSecret(){
         // Fetch client secret when data is available
-        await APIPostRequest({url: 'http://localhost:5000/api/create-payment-intent', data: {amount: totalAmount, currency: "CHF"}, setData: setStripeOptions, setStatus: setStatus});
-        console.log(stripeOptions);
+        // eslint-disable-next-line no-unused-vars
+        const tickets_id = selectedBill.map(([plate, infoBill]) => infoBill.map(({id}) => id)).flat();
+        await APIPostRequest({url: `http://localhost:5000/api/create_payment_intent`, data: {amount: totalAmount, currency: "CHF", ticket_id: tickets_id}, setData: setStripeOptions, setStatus: setStatus});
+        setShowCheckout(true);
     }
 
     const handleOnClick = (value) => {
         return async () => {
             setFilter(value);
-            await getClientSecret();
-            setShowCheckout(true);
+            setLoadIntent(true);
         }
     }
 
@@ -160,7 +167,7 @@ export default function BillingOverview() {
                     <StripeCheckout />
                 </Elements>
                 <div className="checkoutButton">
-                    <button className='btn white-btn' onClick={() => setShowCheckout(false)}>Annuler</button>
+                    <button className='btn white-btn' onClick={() => {setShowCheckout(false); setLoadIntent(false);}}>Annuler</button>
                 </div>
             </div></div>}
         </div>
