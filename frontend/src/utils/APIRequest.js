@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export function APIGetRequest({url, setData, setStatus}) {
-    axios.get(url).then(response => {
+export async function APIGetRequest({url, setData, setStatus}) {
+    await axios.get(url).then(response => {
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })
@@ -15,8 +15,8 @@ export function APIGetRequest({url, setData, setStatus}) {
     });
 }
 
-export function APIPostRequest({url, data, setData, setStatus}) {
-    axios.post(url, data).then(response => {
+export async function APIPostRequest({url, data, setData, setStatus}) {
+    await axios.post(url, data).then(response => {
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })

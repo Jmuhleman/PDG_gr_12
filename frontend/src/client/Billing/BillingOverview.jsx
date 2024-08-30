@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { APIGetRequest } from '../../utils/APIRequest';
 import { useClient } from '../hooks/useClient';
 import { DateTime } from 'luxon';
@@ -8,7 +8,7 @@ import BillingSummary from './BillingSummary';
 import './billing.css'; 
 
 export default function BillingOverview() {
-    const [data, setData] = useState(undefined);
+    const [data, setData] = useState({});
     const [selectedBill, setSelectedBill] = useState(undefined);
     const [status, setStatus] = useState(undefined);
     const [cookies] = useCookies(['client']);
@@ -18,18 +18,58 @@ export default function BillingOverview() {
     const [totalAmount, setTotalAmount] = useState(0);
 
     const {client, setClient} = useClient();
+    const [profile, setProfile] = useState();
 
     const navigate = useNavigate()
+
+    const showstatus = (e) => e;//console.log(e);
+    const handleSetProfile = (data) => {
+        setProfile(data);
+    }
+
+    async function getProfileAndPlate() {
+        await APIGetRequest({
+            url: 'http://localhost:5000/api/users/' + client.value,
+            setData: handleSetProfile,
+            setStatus: showstatus
+        });
+    }
 
     useEffect(() => {
         setClient(cookies.client);
         if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
             APIGetRequest({url: 'http://localhost:5000/api/plate/' + client.value, setData: setData, setStatus: setStatus});
+        else if(client.haveAccount && cookies.client.value !== ""){
+            getProfileAndPlate();
+        }
     }, [client.haveAccount, client.value, navigate, cookies.client.value, setClient]);
 
     useEffect(() => {
-        if(data === undefined) return;
+        if (profile) {
+            const fetchPlates = async () => {
+                const platesData = {};
+                const assignPlate = (d) => Object.assign(platesData, d);
+
+                await Promise.all(
+                    profile.plates.map(async (plate) => {
+                        await APIGetRequest({
+                            url: 'http://localhost:5000/api/plate/' + plate,
+                            setData: assignPlate,
+                            setStatus: showstatus
+                        });
+                    })
+                );
+
+                setData(platesData);
+            };
+
+            fetchPlates();
+        }
+    }, [profile]);
+
+    useEffect(() => {
+        if(data.length === 0) return;
         const fil1 = Object.entries(data).filter(([plate])=> filter.plate.length === 0 ? true : filter.plate.includes(plate))
         const fil2 = fil1.map(([plate, info]) => [plate, info.filter(({parking}) => filter.idBill.length === 0 ? true : filter.idBill.includes(parking))])
         // eslint-disable-next-line no-unused-vars
@@ -52,7 +92,12 @@ export default function BillingOverview() {
                 status && status.code !== 200 ? <h2>Request Status : {status.text}</h2> : null
             }
             {
-                !status ? <p>Chargement...</p> : null
+                client.haveAccount && <div className='profile'>
+                    <NavLink to='/profile' className='btn blue-btn'>Profile</NavLink>
+                </div>
+            }
+            {
+                !data ? <p>Chargement...</p> : null
             }
             {
                 data && Object.entries(data).map(([plate, infoBill]) => {
@@ -76,8 +121,7 @@ export default function BillingOverview() {
                 })
             }
             <button className='btn white-btn' onClick={() => navigate('/')}>Retour</button>
-            <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button>
-            { client.haveAccount && <button onClick={handleOnClick}>Payer Tout</button> }
+            { client.haveAccount && <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button> }
             
             { selectedBill && showCheckout && <div className="checkoutBackground"><div className="checkoutPanel">
                 <h1>Récapitulatif et paiment</h1>
