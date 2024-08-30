@@ -4,3 +4,4 @@ pytest
 requests
 psycopg2
 datetime
+stripe

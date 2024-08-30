@@ -60,7 +60,7 @@ function Home() {
       { value: formData.plate, haveAccount: false },
       { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) }
     );
-    navigate('/billing_overview');
+    navigate('/billingOverview');
   };
 
   // Navigate back to the home state
@@ -118,7 +118,7 @@ function Home() {
     }
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
-    await APIPostRequest({ url: 'http://localhost:5000/api/sign_up/', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
+    await APIPostRequest({ url: 'http://localhost:5000/api/sign_up', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
     if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
       goHome();
       setShowLogin(true);
