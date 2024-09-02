@@ -8,7 +8,9 @@ import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import BillingSummary from './BillingSummary';
 import StripeCheckout from '../../components/StripeCheckout';
-import './billing.css'; 
+import { urlAPI } from '../../../config';
+
+import './billing.css';
 
 const stripePromise = loadStripe('pk_test_51Pt6wyRvF3tg1R6wz7YSiyG6z01KIUdvstXdu5CnjIwrAOkJkQZfKvzmOBiGuuVo2t8Tiv7xXPlD609PSShBjNuj00wmypaePA');
 
@@ -37,7 +39,7 @@ export default function BillingOverview() {
 
     async function getProfileAndPlate() {
         await APIGetRequest({
-            url: `http://localhost:5000/api/users/${client.value}`,
+            url: `${urlAPI}/users/${client.value}`,
             setData: handleSetProfile,
             setStatus: showstatus
         });
@@ -47,7 +49,7 @@ export default function BillingOverview() {
         setClient(cookies.client);
         if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
-            APIGetRequest({url: `http://localhost:5000/api/plate/${client.value}`, setData: setData, setStatus: setStatus});
+            APIGetRequest({url: `${urlAPI}/api/plate/${client.value}`, setData: setData, setStatus: setStatus});
         else if(client.haveAccount && cookies.client.value !== ""){
             getProfileAndPlate();
         }
@@ -62,7 +64,7 @@ export default function BillingOverview() {
                 await Promise.all(
                     profile.plates.map(async (plate) => {
                         await APIGetRequest({
-                            url: `http://localhost:5000/api/users/${plate}`,
+                            url: `${urlAPI}/api/users/${plate}`,
                             setData: assignPlate,
                             setStatus: showstatus
                         });
@@ -94,7 +96,7 @@ export default function BillingOverview() {
         // Fetch client secret when data is available
         // eslint-disable-next-line no-unused-vars
         const tickets_id = selectedBill.map(([plate, infoBill]) => infoBill.map(({id}) => id)).flat();
-        await APIPostRequest({url: `http://localhost:5000/api/create_payment_intent`, data: {amount: totalAmount, currency: "CHF", ticket_id: tickets_id}, setData: setStripeOptions, setStatus: setStatus});
+        await APIPostRequest({url: `${urlAPI}/api/create_payment_intent`, data: {amount: totalAmount, currency: "CHF", ticket_id: tickets_id}, setData: setStripeOptions, setStatus: setStatus});
         setShowCheckout(true);
     }
 

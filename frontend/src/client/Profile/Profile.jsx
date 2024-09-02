@@ -5,7 +5,7 @@ import { APIGetRequest, APIDeleteRequest, APIPostRequest } from '../../utils/API
 import "./profile.css"
 import PlateButton from '../../components/PlateButton';
 import SubmitForm from '../../components/SubmitForm';
-
+import { urlAPI } from '../../../config';
 const Profile = () => {
     const [profileData, setProfileData] = useState(null);
     const [DeleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
@@ -15,11 +15,11 @@ const Profile = () => {
 
     useEffect(() => {
         if (userId === "") navigate('/');
-        APIGetRequest({url: `http://localhost:5000/api/users/${userId}`, setData: setProfileData, setStatus: ()=>{}});
+        APIGetRequest({url: `${urlAPI}/api/users/${userId}`, setData: setProfileData, setStatus: ()=>{}});
     }, [userId, navigate]);
 
     const handelDeletePlate = async (plate) => {
-        await APIDeleteRequest({url: `http://localhost:5000/api/users/${userId}/plates/${plate}`, setStatus: setDeleteStatus});
+        await APIDeleteRequest({url: `${urlAPI}/api/users/${userId}/plates/${plate}`, setStatus: setDeleteStatus});
     }
     
     const [newPlate, setNewPlate] = useState("");
@@ -29,7 +29,7 @@ const Profile = () => {
     }
     const handleAddPlate = async (event) => {
         event.preventDefault();
-        await APIPostRequest({url: `http://localhost:5000/api/users/${userId}/plates`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
+        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/plates`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
 
     }
 
@@ -42,7 +42,7 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
-        await APIPostRequest({url: `http://localhost:5000/api/users/${userId}/password`, data: formData, setStatus: setChangePasswordStatus});
+        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/password`, data: formData, setStatus: setChangePasswordStatus});
     };
     const changePasswordFields = [
         { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
