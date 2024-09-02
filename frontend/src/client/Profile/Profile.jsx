@@ -6,6 +6,8 @@ import "./profile.css"
 import PlateButton from '../../components/PlateButton';
 import SubmitForm from '../../components/SubmitForm';
 import { urlAPI } from '../../../config';
+import argon2 from 'argon2';
+
 const Profile = () => {
     const [profileData, setProfileData] = useState(null);
     const [DeleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
@@ -42,7 +44,8 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
-        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/password`, data: formData, setStatus: setChangePasswordStatus});
+        const data = {old: await argon2.hash(formData.oldPassword), new: await argon2.hash(formData.password)}
+        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/password`, data: data, setStatus: setChangePasswordStatus});
     };
     const changePasswordFields = [
         { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
