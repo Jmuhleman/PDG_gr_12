@@ -92,11 +92,28 @@ function Home() {
     console.log('Login form submitted:', formData);
     // Add actual login logic here
     await APIPostRequest({ url: `${urlAPI}/api/sing_in`, data: formData, setData: setSignInData, setStatus: setSignInStatus });
-    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
-      setClient({ value: signInData.account, haveAccount: true });
-      setCookie('client', { value: signInData.account, haveAccount: true }, { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) });
-      navigate('/billing_overview');
-    }
+    if(signUpStatus?.code >= 200 && signUpStatus?.code < 300) {
+      const jwtToken = signInData?.jwt; // Assume JWT is part of signInData
+      if (jwtToken) { 
+        // Store the JWT in a cookie
+        setCookie('access_token', jwtToken, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 days expiry
+          secure: true, // Only sent over HTTPS
+          sameSite: 'Strict' // Prevents CSRF
+        });
+        setClient({ value: signInData.account, haveAccount: true });
+        navigate('/billing_overview');
+      } else {
+        console.error('JWT not found in response');
+      }
+    } else {
+      console.error('Login failed:', signInStatus);
+      // Handle the login failure case here, like showing an error message
+  }
+
+
+
   };
 
   const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
