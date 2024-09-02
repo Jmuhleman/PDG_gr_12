@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
-import { APIGetRequest, APIDeleteRequest, APIPostRequest } from '../../utils/APIRequest';
+import { APIGetRequest, APIDeleteRequest, APIPostRequest, APIPatchRequest } from '../../utils/APIRequest';
 import "./profile.css"
 import PlateButton from '../../components/PlateButton';
 import { useCookies } from 'react-cookie';
@@ -51,7 +51,7 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
-        const data = {old: formData.oldPassword, new: formData.password}
+        const data = {password: formData.oldPassword, new_password: formData.password}
         await APIPostRequest({url: `${urlAPI}/users/${client.value}/password`, data: data, setStatus: setChangePasswordStatus});
     };
     const changePasswordFields = [
@@ -80,7 +80,6 @@ const Profile = () => {
             ) : (
                 <p>Loading profile data...</p>
             )}
-            <div className='separator' />
             <button onClick={()=>setChangePassword(!changePassword)} className='btn blue-btn'>Changer de mot de passe</button>
             { profileData && changePassword && <SubmitForm 
                 label='Change Password' 
