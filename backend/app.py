@@ -1,11 +1,14 @@
 from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import jwt
+import datetime
 import utils
 
 app = Flask(__name__)
 CORS(app)
 
+SECRET_KEY = '0123456789876543210'
 
 @app.route('/api/users/', methods=['GET'])
 def get_users():
@@ -225,7 +228,6 @@ def remove_plate(id):
         utils.close_connection_db(cursor, conn)
 
 
-
 @app.route('/api/sign_up/', methods=['POST'])
 def set_user():
     """Handles requests to subscribe user data in the DB."""
@@ -295,6 +297,42 @@ def set_user():
     except Exception as e:
         if conn:
             conn.rollback()  # En cas d'erreur, on annule les modifications
+        return jsonify({'status': str(e)}), 500
+
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/sign_in', methods=['GET'])
+def sign_in():
+    """Handles requests to sign_in."""
+
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+
+        query = """
+            SELECT id
+            FROM customers
+            WHERE email = %s AND password = %s
+        """
+
+        data = request.get_json()
+
+        cursor.execute(query, (data.get('email'), data.get('password'),))
+        id = cursor.fetchone()
+
+        if id is None:
+            return jsonify({'status': 'User not found'}), 404
+        else:
+            expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1, minutes=30)
+            jwt_payload = {
+                'id': id,
+                'exp': expiration_time
+            }
+            token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
+            return jsonify({'token': token}), 200
+
+    except Exception as e:
         return jsonify({'status': str(e)}), 500
 
     finally:

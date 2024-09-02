@@ -1,10 +1,14 @@
 import requests
+import base64
 
 # Base URL of the Flask application
 base_url_plate = 'http://127.0.0.1:5000/api/plate/'
 base_url_users = 'http://127.0.0.1:5000/api/users/'
 base_url_post_user = 'http://127.0.0.1:5000/api/sign_up/'
+base_url_sign_in = 'http://127.0.0.1:5000/api/sign_in'
 
+#jwt_token = '123'
+#header, payload, signature = jwt_token.split('.')
 
 def get_plate_data(plate_no):
     """Send a GET request to retrieve data for a given plate number."""
@@ -157,7 +161,7 @@ def add_plate(id, new_plate):
 
 
 def remove_plate(id, delete_plate):
-    """Send DELETE request to API to sign in a new user"""
+    """Send DELETE request to API to delete a plate"""
     
     url = f"{base_url_users}{id}/plate"
 
@@ -182,6 +186,29 @@ def remove_plate(id, delete_plate):
     except requests.RequestException as e:
         print(f"Request error: {e}")
 
+
+def sign_in(email, password):
+    """Send GET request to API to sign in a new user"""
+    
+    url = base_url_sign_in
+
+    try:
+        user_data = {'email': email}
+        user_data['password'] = password
+        response = requests.get(url, json=user_data)
+        data = response.json()
+
+        if response.status_code == 200:
+            print("User signed in:")
+            print(data.get('token'))
+
+        elif response.status_code == 404:
+            print(data.get('status', 'Error 404'))
+        else:
+            print(f"{response.status_code} - {response.text}")
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
 
 """"
 Mock data to query the backend
@@ -236,7 +263,8 @@ for id in ids:
 # add_plate(1, 'AR123')
 # remove_plate(1, 'VD12345')
 
-
+# test sign_in function
+# sign_in('john.wayne@western.ch1', 'Wayne$123')
 
 
 
