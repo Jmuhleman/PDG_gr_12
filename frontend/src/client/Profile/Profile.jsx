@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useClient } from '../hooks/useClient';
+import { useNavigate } from 'react-router-dom';
 import { APIGetRequest, APIDeleteRequest, APIPostRequest } from '../../utils/APIRequest';
 import "./profile.css"
 import PlateButton from '../../components/PlateButton';
+import SubmitForm from '../../components/SubmitForm';
 
 const Profile = () => {
     const [profileData, setProfileData] = useState(null);
     const [DeleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
     const userId = useClient.value;
+    const navigate = useNavigate();
     const [canDeletePlate, setCanDeletePlate] = useState(false);
 
     useEffect(() => {
+        if (userId === "") navigate('/');
         APIGetRequest({url: `http://localhost:5000/api/users/${userId}`, setData: setProfileData, setStatus: ()=>{}});
-    }, [userId]);
+    }, [userId, navigate]);
 
     const handelDeletePlate = async (plate) => {
         await APIDeleteRequest({url: `http://localhost:5000/api/users/${userId}/plates/${plate}`, setStatus: setDeleteStatus});
@@ -35,8 +39,19 @@ const Profile = () => {
         setShowAddPlate(!showAddPlate)
     }
 
+    const [changePassword, setChangePassword] = useState(false);
+    const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
+    const handleChangePassword = async (formData) => {
+        await APIPostRequest({url: `http://localhost:5000/api/users/${userId}/password`, data: formData, setStatus: setChangePasswordStatus});
+    };
+    const changePasswordFields = [
+        { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
+        { id: 'password', label: 'Nouveau mot de passe', type: 'password', placeholder: 'votre nouveau mot de passe', className: 'full-width' },
+        { id: 'confirmPassword', label: 'Confirmation', type: 'password', placeholder: 'votre mot de passe', className: 'full-width' }
+    ];
+
     return (
-        <div>
+        <div className='profile'>
             {profileData ? (
                 <div className='profilePanel'>
                     <h1>{profileData.lastname + " " + profileData.firstname}</h1>
@@ -53,6 +68,15 @@ const Profile = () => {
             ) : (
                 <p>Loading profile data...</p>
             )}
+            <div className='separator' />
+            <button onClick={()=>setChangePassword(!changePassword)} className='btn blue-btn'>Changer de mot de passe</button>
+            { profileData && changePassword && <SubmitForm 
+                label='Change Password' 
+                buttonText='Confirmer' 
+                onSubmit={handleChangePassword} 
+                fieldsConfig={changePasswordFields} 
+                message={changePasswordStatus.text} />}
+
             <button className='btn white-btn' onClick={() => window.history.back()}>Back</button>
         </div>
     );
