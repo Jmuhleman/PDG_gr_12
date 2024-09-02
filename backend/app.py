@@ -12,9 +12,10 @@ import stripe
 
 import utils
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 SECRET_KEY = '0123456789876543210'
+ph = PasswordHasher()
 
 def create_jwt(email):
     expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
@@ -100,7 +101,7 @@ def get_user(id):
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/users/<id>/change_password', methods=['PATCH'])
+@app.route('/api/users/<id>/password', methods=['PATCH'])
 def update_password(id):
     """Handles requests to change the password of a user."""
 
@@ -189,8 +190,8 @@ def add_plate(id):
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/users/<id>/plate', methods=['DELETE'])
-def remove_plate(id):
+@app.route('/api/users/<id>/plate/<plate>', methods=['DELETE'])
+def remove_plate(id, plate):
     """Handles requests to remove a plate number."""
 
     try:
@@ -205,7 +206,7 @@ def remove_plate(id):
         user_data = cursor.fetchone()
 
         if user_data is None:
-            return jsonify({'status': 'User ID not found'}), 404
+            return jsonify({'status': 'User ID not found'}), 204
 
         query = """
             SELECT plate
@@ -216,10 +217,9 @@ def remove_plate(id):
         existing_plates = cursor.fetchall()
 
         if len(existing_plates) == 0:
-            return jsonify({'status': 'No plates found'}), 404
+            return jsonify({'status': 'No plates found'}), 204
 
-        data = request.get_json()
-        plate_to_remove = data.get('plate')
+        plate_to_remove = plate
 
         if plate_to_remove not in [plate[0] for plate in existing_plates]:
             return jsonify({'status': 'Plate number not found'}), 404
@@ -242,10 +242,21 @@ def remove_plate(id):
     finally:
         utils.close_connection_db(cursor, conn)
 
+def _build_cors_preflight_response():
+    response = jsonify({'status': 'CORS preflight successful'})
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:3000")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "POST, PATCH, OPTIONS")
+    response.headers.add("Access-Control-Allow-Credentials", "true")
+    return response
 
-@app.route('/api/sign_up/', methods=['POST'])
+@app.route('/api/sign_up', methods=['POST'])
 def set_user():
     """Handles requests to subscribe user data in the DB."""
+    if request.method == 'OPTIONS':
+        # CORS preflight request
+        return _build_cors_preflight_response()
+    
     data = request.get_json()
 
     try:
@@ -323,41 +334,40 @@ def set_user():
 @app.route('/api/sign_in', methods=['POST']) # Changed from GET to POST to prevent sensitive information exposure in URLs and logs. 
 def sign_in():
     """Handles requests to sign_in."""
+    if request.method == 'OPTIONS':
+        # CORS preflight request
+        return _build_cors_preflight_response()
 
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
 
         query = """
-            SELECT id
+            SELECT id, password
             FROM customers
-            WHERE email = %s AND password = %s
+            WHERE email = %s
         """
 
         data = request.get_json()
 
-        cursor.execute(query, (data.get('email'), data.get('password'),))
-        id = cursor.fetchone()
+        cursor.execute(query, (data.get('email'),))
+        (id, stored_hash) = cursor.fetchone()
 
         if id is None:
             return jsonify({'status': 'User not found'}), 404
         else:
             try:
                 # Verify the password using Argon2
-                ph.verify(stored_hash, password)
+                ph.verify(stored_hash, data.get('password'))
             except:
                 return jsonify({'status': 'Invalid password'}), 401
+            
             expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
                 'exp': expiration_time
             }
             token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
-            response = make_response(jsonify({'status': 'Login successful'}))
-            response.set_cookie('access_token', token, 
-                                httponly=True, 
-                                secure=True, 
-                                samesite='Strict', 
-                                max_age=60*60*24*7)  # 7 days expiry
+            response = make_response(jsonify({'status': 'Login successful', 'id': id, 'jwt': token}))
             return response
 
     except Exception as e:
@@ -384,7 +394,7 @@ def get_plate(plate_no):
         res = cursor.fetchall()
 
         if not res:
-            return jsonify({'status': 'Plate number not found'}), 404
+            return jsonify({'status': 'Plate number not found'}), 204 # the route work but the plate number carries no bill
 
         column_names = [desc[0] for desc in cursor.description]
         results_list = [dict(zip(column_names, row)) for row in res]
