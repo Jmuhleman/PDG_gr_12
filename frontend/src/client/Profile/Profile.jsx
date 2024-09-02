@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
-import { APIGetRequest, APIDeleteRequest, APIPostRequest } from '../../utils/APIRequest';
+import { APIGetRequest, APIDeleteRequest, APIPostRequest, APIPatchRequest } from '../../utils/APIRequest';
 import "./profile.css"
 import PlateButton from '../../components/PlateButton';
 import SubmitForm from '../../components/SubmitForm';
@@ -21,7 +21,7 @@ const Profile = () => {
     }, [userId, navigate]);
 
     const handelDeletePlate = async (plate) => {
-        await APIDeleteRequest({url: `${urlAPI}/api/users/${userId}/plates/${plate}`, setStatus: setDeleteStatus});
+        await APIDeleteRequest({url: `${urlAPI}/api/users/${userId}/plate/${plate}`, setStatus: setDeleteStatus});
     }
     
     const [newPlate, setNewPlate] = useState("");
@@ -31,7 +31,7 @@ const Profile = () => {
     }
     const handleAddPlate = async (event) => {
         event.preventDefault();
-        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/plates`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
+        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/plate`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
 
     }
 
@@ -44,8 +44,8 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
-        const data = {old: await argon2.hash(formData.oldPassword), new: await argon2.hash(formData.password)}
-        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/password`, data: data, setStatus: setChangePasswordStatus});
+        const data = {password: await argon2.hash(formData.oldPassword), new_password: await argon2.hash(formData.password)}
+        await APIPatchRequest({url: `${urlAPI}/api/users/${userId}/change_password`, data: data, setStatus: setChangePasswordStatus});
     };
     const changePasswordFields = [
         { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
@@ -71,7 +71,6 @@ const Profile = () => {
             ) : (
                 <p>Loading profile data...</p>
             )}
-            <div className='separator' />
             <button onClick={()=>setChangePassword(!changePassword)} className='btn blue-btn'>Changer de mot de passe</button>
             { profileData && changePassword && <SubmitForm 
                 label='Change Password' 
