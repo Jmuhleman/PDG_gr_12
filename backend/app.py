@@ -11,6 +11,12 @@ CORS(app)
 
 SECRET_KEY = '0123456789876543210'
 
+def create_jwt(email):
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    token = jwt.encode({'email': email, 'exp': expiration}, SECRET_KEY, algorithm='HS256')
+    return token
+
+
 @app.route('/api/users/', methods=['GET'])
 def get_users():
     """Handles requests to retrieve all users"""
@@ -111,7 +117,10 @@ def update_password(id):
         if user_data[0] != data['password']:
             return jsonify({'status': 'Incorrect user password'}), 403
 
-        query_customer = """
+        query_customer = """def create_jwt(email):
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
+    token = jwt.encode({'email': email, 'exp': expiration}, SECRET_KEY, algorithm='HS256')
+    return token
             UPDATE customers
             SET password = %s
             WHERE id = %s;
@@ -304,7 +313,7 @@ def set_user():
         utils.close_connection_db(cursor, conn)
 
 
-@app.route('/api/sign_in', methods=['GET'])
+@app.route('/api/sign_in', methods=['POST']) # Changed from GET to POST to prevent sensitive information exposure in URLs and logs. 
 def sign_in():
     """Handles requests to sign_in."""
 
@@ -325,13 +334,24 @@ def sign_in():
         if id is None:
             return jsonify({'status': 'User not found'}), 404
         else:
+            try:
+                # Verify the password using Argon2
+                ph.verify(stored_hash, password)
+            except:
+                return jsonify({'status': 'Invalid password'}), 401
             expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
                 'exp': expiration_time
             }
             token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
-            return jsonify({'token': token}), 200
+            response = make_response(jsonify({'status': 'Login successful'}))
+            response.set_cookie('access_token', token, 
+                                httponly=True, 
+                                secure=True, 
+                                samesite='Strict', 
+                                max_age=60*60*24*7)  # 7 days expiry
+            return response
 
     except Exception as e:
         return jsonify({'status': str(e)}), 500

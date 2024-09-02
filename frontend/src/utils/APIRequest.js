@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+const  instance = axios.create({
+    withCredentials:true
+})
+
 export async function APIGetRequest({url, setData, setStatus}) {
-    await axios.get(url).then(response => {
+    await instance.get(url).then(response => {
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })
@@ -16,7 +20,7 @@ export async function APIGetRequest({url, setData, setStatus}) {
 }
 
 export async function APIPostRequest({url, data, setData, setStatus}) {
-    await axios.post(url, data).then(response => {
+    await instance.post(url, data).then(response => {
         setStatus({code:response.status, text:response.statusText});
         setData(response.data);
     })
@@ -31,7 +35,7 @@ export async function APIPostRequest({url, data, setData, setStatus}) {
 }
 
 export async function APIDeleteRequest({url, setStatus}) {
-    await axios.delete(url).then(response => {
+    await instance.delete(url).then(response => {
         setStatus({code:response.status, text:response.statusText});
     })
     .catch(error => {
