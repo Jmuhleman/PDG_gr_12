@@ -6,6 +6,7 @@ import { ClientProvider } from './client/hooks/useClient';
 import BillingOverview from './client/Billing/BillingOverview';
 import HomePage from './client/Home/HomePage';
 import PaymentSuccess from './client/Billing/PaymentSuccess';
+import Profile from './client/Profile/Profile';
 
 const router = createBrowserRouter([
     {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
             {
                 path: "billingSuccess",
                 element: <PaymentSuccess />,
+            },
+            {
+                path: "Profile",
+                element: <Profile />,
             }
         ],
     },

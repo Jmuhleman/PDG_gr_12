@@ -1,0 +1,82 @@
+p {
+    margin: 0;
+}
+.profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    * {
+        margin-bottom: 10px;
+    }
+}
+.profilePanel{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    span {
+        display: flex;
+        flex-direction: row;
+        * {
+            padding: 10px 16px;
+        }
+    }
+}
+
+.addPlateForm {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+@media (min-width: 768px) {
+    .addPlateForm {
+        display: grid;
+        grid-template-areas: "a b" "d d";
+        label {
+            grid-area: a;
+            margin-bottom: 0px;
+        }
+        .textarea {
+            grid-area: b;
+            margin-bottom: 0px;
+        }
+        .submit {
+            grid-area: d;
+            margin-bottom: 0px;
+        }
+    }
+}
+
+.btn {
+    padding: 8px 16px; /* Reduced padding for smaller buttons */
+    border-radius: 4px; /* Slightly rounded corners */
+    border: none; /* No border */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.blue-btn {
+    background-color: #007bff; /* Primary blue color to match form button */
+    color: #fff; /* White text */
+}
+
+.blue-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+
+.white-btn {
+    background-color: #E1ECF7; /* Light blue background for contrast */
+    color: #007bff; /* Primary blue text color */
+}
+
+.white-btn:hover {
+    background-color: #bcd9f7; /* Slightly darker shade on hover */
+}

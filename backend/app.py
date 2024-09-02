@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route('/api/users', methods=['GET'])
+@app.route('/api/users/', methods=['GET'])
 def get_users():
     """Handles requests to retrieve all users"""
 
