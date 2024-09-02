@@ -110,15 +110,10 @@ function Home() {
     } else {
       console.error('Login failed:', signInStatus);
       // Handle the login failure case here, like showing an error message
-  }
-
-
-
+    }
   };
 
   const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
-    //const hash = await argon2.hash(password);
-
     const formData = {
       "lastname": lastname,
       "firstname": firstname,
@@ -137,7 +132,7 @@ function Home() {
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
     await APIPostRequest({ url: `${urlAPI}/api/sign_up`, data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
-    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
+    if(signUpStatus?.code >= 200 && signUpStatus?.code < 300) {
       goHome();
       setShowLogin(true);
     }

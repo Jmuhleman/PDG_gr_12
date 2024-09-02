@@ -244,10 +244,12 @@ def set_user():
     data = request.get_json()
 
     try:
-
         if not utils.verify_fields(data):
             return jsonify({'status': 'Fields not valid'}), 400
         
+        # Hash du mot de passe
+        hashed_password = ph.hash(data['password'])
+
         # Connexion à la base de données
         cursor, conn = utils.connect_to_db(utils.db_params)
         
@@ -285,7 +287,7 @@ def set_user():
         cursor.execute(query_customer, (
             data['firstname'], data['lastname'], data['address']['street'], data['address']['number'], 
             data['address']['city'], data['address']['zip'], data['address']['country'], data['phone'], 
-            data['email'], data['password']
+            data['email'], hashed_password
         ))
 
         # Récupération de l'ID du client inséré
