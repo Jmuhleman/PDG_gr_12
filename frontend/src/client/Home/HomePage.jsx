@@ -7,6 +7,7 @@ import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
 import { APIPostRequest } from '../../utils/APIRequest';
+import { urlAPI } from '../../../config';
 
 function Home() {
   // Form field configurations
@@ -90,7 +91,7 @@ function Home() {
     const formData = {"email": email, "password": password};
     console.log('Login form submitted:', formData);
     // Add actual login logic here
-    await APIPostRequest({ url: 'http://localhost:5000/api/sing_in', data: formData, setData: setSignInData, setStatus: setSignInStatus });
+    await APIPostRequest({ url: `${urlAPI}/api/sing_in`, data: formData, setData: setSignInData, setStatus: setSignInStatus });
     if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
       setClient({ value: signInData.account, haveAccount: true });
       setCookie('client', { value: signInData.account, haveAccount: true }, { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) });
@@ -118,7 +119,7 @@ function Home() {
     }
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
-    await APIPostRequest({ url: 'http://localhost:5000/api/sign_up', data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
+    await APIPostRequest({ url: `${urlAPI}/api/sign_up`, data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
     if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
       goHome();
       setShowLogin(true);
