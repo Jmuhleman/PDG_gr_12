@@ -1,10 +1,12 @@
-from datetime import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
+import threading
+import ia
 import utils
 
 app = Flask(__name__)
 CORS(app)
+
 
 
 @app.route('/api/users/', methods=['GET'])
@@ -203,10 +205,25 @@ def get_plate(plate_no):
 
 
 
-@app.route('/api/hello', methods=['GET'])
-def hello_world():
-    return jsonify(message="Hello, World!")
+@app.route('/api/hello/', methods=['GET'])
+def hello():
+    return jsonify(message= "hola"), 200
+    #return jsonify(message="Hello, World!")
+
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port="5000", debug=True)
+    ia_in = threading.Thread(target=ia.start_ia_in, daemon=False)
+    ia_out = threading.Thread(target=ia.start_ia_out, daemon=True)
+    ia_in.start()
+    ia_out.start()
+    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
+    ia_in.join()
+    ia_out.join()
+
+
+
+
+
+
+
