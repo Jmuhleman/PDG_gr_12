@@ -52,7 +52,6 @@ export async function APIPatchRequest({ url, data, setStatus }) {
     try {
         const response = await instance.patch(url, data);
         setStatus({ code: response.status, text: response.statusText });
-        setData(response.data);
     } catch (error) {
         if (error.code === "ERR_NETWORK") {
             setStatus({code:500, text:"Internal Server Error or Network Error"});

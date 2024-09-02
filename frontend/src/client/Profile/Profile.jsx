@@ -52,7 +52,8 @@ const Profile = () => {
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
         const data = {password: formData.oldPassword, new_password: formData.password}
-        await APIPostRequest({url: `${urlAPI}/users/${client.value}/password`, data: data, setStatus: setChangePasswordStatus});
+        await APIPatchRequest({url: `${urlAPI}/users/${client.value}/password`, data: data, setStatus: setChangePasswordStatus});
+        setChangePassword(false)
     };
     const changePasswordFields = [
         { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
