@@ -8,7 +8,7 @@ import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import BillingSummary from './BillingSummary';
 import StripeCheckout from '../../components/StripeCheckout';
-import { urlAPI } from '../../../config';
+import { urlAPI } from '../../config.js';
 
 import './billing.css';
 
@@ -49,7 +49,7 @@ export default function BillingOverview() {
         setClient(cookies.client);
         if (client.value === "" && cookies.client.value === "") navigate('/');
         if (!client.haveAccount && client.value !== "")
-            APIGetRequest({url: `${urlAPI}/api/plate/${client.value}`, setData: setData, setStatus: setStatus});
+            APIGetRequest({url: `${urlAPI}/plate/${client.value}`, setData: setData, setStatus: setStatus});
         else if(client.haveAccount && cookies.client.value !== ""){
             getProfileAndPlate();
         }
@@ -58,16 +58,22 @@ export default function BillingOverview() {
     useEffect(() => {
         if (profile) {
             const fetchPlates = async () => {
-                const platesData = {};
+                let platesData = {};
                 const assignPlate = (d) => Object.assign(platesData, d);
+                let status = {code: 0, text: ""};
+                const setStatus = (e) => status = e;
 
                 await Promise.all(
                     profile.plates.map(async (plate) => {
                         await APIGetRequest({
-                            url: `${urlAPI}/api/users/${plate}`,
+                            url: `${urlAPI}/plate/${plate}`,
                             setData: assignPlate,
-                            setStatus: showstatus
+                            setStatus: setStatus
                         });
+                        if(status.code === 204) {
+                            console.log(`Plate ${plate} has no billing data`);
+                            assignPlate({[plate]: []});
+                        }
                     })
                 );
 
@@ -96,7 +102,7 @@ export default function BillingOverview() {
         // Fetch client secret when data is available
         // eslint-disable-next-line no-unused-vars
         const tickets_id = selectedBill.map(([plate, infoBill]) => infoBill.map(({id}) => id)).flat();
-        await APIPostRequest({url: `${urlAPI}/api/create_payment_intent`, data: {amount: totalAmount, currency: "CHF", ticket_id: tickets_id}, setData: setStripeOptions, setStatus: setStatus});
+        await APIPostRequest({url: `${urlAPI}/create_payment_intent`, data: {amount: totalAmount, currency: "CHF", ticket_id: tickets_id}, setData: setStripeOptions, setStatus: setStatus});
         setShowCheckout(true);
     }
 
@@ -123,23 +129,26 @@ export default function BillingOverview() {
             }
             {
                 data && Object.entries(data).map(([plate, infoBill]) => {
-                    return (<div key={plate}>
-                        <h2 onClick={handleOnClick({plate:[plate], idBill:[]})}>Facture pour la plaque {plate}</h2>
-                        <div className="billings">
-                            {
-                                infoBill.map(({parking, timestamp_in, timestamp_out, duration, amount }, index) => {
-                                    return <BillingSummary key={ timestamp_in+index }
-                                        plate={ plate }
-                                        parking={ parking }
-                                        timestamp_in={ timestamp_in }
-                                        timestamp_out={ timestamp_out }
-                                        duration={ duration}
-                                        amount={ amount }
-                                        onClick={handleOnClick} />
-                                })
-                            }
-                        </div>
-                    </div>)
+                    if(infoBill.length === 0) return <h2 key={plate}>Pas de facture pour la plaque {plate}</h2>
+                    else {
+                        return (<div key={plate}>
+                            <h2 onClick={handleOnClick({plate:[plate], idBill:[]})}>Facture pour la plaque {plate}</h2>
+                            <div className="billings">
+                                {
+                                    infoBill.map(({parking, timestamp_in, timestamp_out, duration, amount }, index) => {
+                                        return <BillingSummary key={ timestamp_in+index }
+                                            plate={ plate }
+                                            parking={ parking }
+                                            timestamp_in={ timestamp_in }
+                                            timestamp_out={ timestamp_out }
+                                            duration={ duration}
+                                            amount={ amount }
+                                            onClick={handleOnClick} />
+                                    })
+                                }
+                            </div>
+                        </div>)
+                    }
                 })
             }
             <button className='btn white-btn' onClick={() => navigate('/')}>Retour</button>

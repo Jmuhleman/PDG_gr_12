@@ -6,8 +6,8 @@ import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
-import { APIPostRequest } from '../../utils/APIRequest';
-import { urlAPI } from '../../../config';
+import { APIPostRequestWithoutCredentials } from '../../utils/APIRequest';
+import { urlAPI } from '../../config';
 
 function Home() {
   // Form field configurations
@@ -91,17 +91,31 @@ function Home() {
     const formData = {"email": email, "password": password};
     console.log('Login form submitted:', formData);
     // Add actual login logic here
-    await APIPostRequest({ url: `${urlAPI}/api/sing_in`, data: formData, setData: setSignInData, setStatus: setSignInStatus });
-    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
-      setClient({ value: signInData.account, haveAccount: true });
-      setCookie('client', { value: signInData.account, haveAccount: true }, { path: '/', expires: new Date(Date.now() + 1000 * 3600 * 24 * 7) });
-      navigate('/billing_overview');
-    }
+    await APIPostRequestWithoutCredentials({ url: `${urlAPI}/sign_in`, data: formData, setData: setSignInData, setStatus: setSignInStatus });
   };
 
-  const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
-    //const hash = await argon2.hash(password);
+  useEffect(() => {
+    if(signInStatus?.code >= 200 && signInStatus?.code < 300) {
+      const client = signInData?.id;
+      const jwToken = signInData?.jwt; // Assume JWT is part of signInData
+      if (jwToken) { 
+        // Store the JWT in a cookie
+        setCookie('access_token', jwToken, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7, // 7 days expiry
+          secure: false, // Only sent over HTTPS
+          sameSite: 'Strict' // Prevents CSRF
+        });
+        setClient({ value: client, haveAccount: true });
+        setCookie('client', { value: client, haveAccount: true }, { path: '/' });
+        navigate('/billingOverview');
+      } else {
+        console.error('JWT not found in response');
+      }
+    }
+  }, [signInStatus]);
 
+  const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
     const formData = {
       "lastname": lastname,
       "firstname": firstname,
@@ -119,12 +133,15 @@ function Home() {
     }
     console.log('Sign up form submitted:', formData);
     // Add actual sign-up logic here
-    await APIPostRequest({ url: `${urlAPI}/api/sign_up`, data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
-    if(signUpStatus.code >= 200 && signUpStatus.code < 300) {
+    await APIPostRequestWithoutCredentials({ url: `${urlAPI}/sign_up`, data: formData, setData: (data)=>console.log(data), setStatus: setSignUpStatus });
+  };
+
+  useEffect(() => {
+    if(signUpStatus?.code >= 200 && signUpStatus?.code < 300) {
       goHome();
       setShowLogin(true);
     }
-  };
+  }, [signUpStatus]);
 
   return (
     <div>

@@ -4,35 +4,42 @@ import { useNavigate } from 'react-router-dom';
 import { APIGetRequest, APIDeleteRequest, APIPostRequest, APIPatchRequest } from '../../utils/APIRequest';
 import "./profile.css"
 import PlateButton from '../../components/PlateButton';
+import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
-import { urlAPI } from '../../../config';
-import argon2 from 'argon2';
+import { urlAPI } from '../../config';
 
 const Profile = () => {
+    const [cookies] = useCookies(['client']);
     const [profileData, setProfileData] = useState(null);
-    const [DeleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
-    const userId = useClient.value;
+    const [deleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
+    const {client, setClient} = useClient();
     const navigate = useNavigate();
     const [canDeletePlate, setCanDeletePlate] = useState(false);
-
-    useEffect(() => {
-        if (userId === "") navigate('/');
-        APIGetRequest({url: `${urlAPI}/api/users/${userId}`, setData: setProfileData, setStatus: ()=>{}});
-    }, [userId, navigate]);
-
-    const handelDeletePlate = async (plate) => {
-        await APIDeleteRequest({url: `${urlAPI}/api/users/${userId}/plate/${plate}`, setStatus: setDeleteStatus});
-    }
-    
     const [newPlate, setNewPlate] = useState("");
     const [newPlateStatus, setNewPlateStatus] = useState({code: 0, text: ""});
+
+    useEffect(() => {
+        if (client.value === "" && cookies.client.value === "")
+        {
+            navigate('/');
+        } else if (client.value === ""){
+            setClient(cookies.client);
+        }
+        else{
+            APIGetRequest({url: `${urlAPI}/users/${client.value}`, setData: setProfileData, setStatus: ()=>{}});
+        }
+    }, [client, navigate, newPlateStatus, deleteStatus]);
+
+    const handelDeletePlate = async (plate) => {
+        await APIDeleteRequest({url: `${urlAPI}/users/${client.value}/plate/${plate}`, setStatus: setDeleteStatus});
+    }
+    
     const handleChangeNewPlate = (e) => {
         setNewPlate(e.target.value);
     }
     const handleAddPlate = async (event) => {
         event.preventDefault();
-        await APIPostRequest({url: `${urlAPI}/api/users/${userId}/plate`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
-
+        await APIPostRequest({url: `${urlAPI}/users/${client.value}/plate`, data: {plate: newPlate}, setStatus: setNewPlateStatus});
     }
 
     const [showAddPlate, setShowAddPlate] = useState(false);
@@ -44,8 +51,8 @@ const Profile = () => {
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
     const handleChangePassword = async (formData) => {
-        const data = {password: await argon2.hash(formData.oldPassword), new_password: await argon2.hash(formData.password)}
-        await APIPatchRequest({url: `${urlAPI}/api/users/${userId}/change_password`, data: data, setStatus: setChangePasswordStatus});
+        const data = {password: formData.oldPassword, new_password: formData.password}
+        await APIPostRequest({url: `${urlAPI}/users/${client.value}/password`, data: data, setStatus: setChangePasswordStatus});
     };
     const changePasswordFields = [
         { id: 'oldPassword', label: 'Ancien mot de passe', type: 'Password', placeholder: 'votre ancien mot de passe', className: 'full-width' },
@@ -59,14 +66,16 @@ const Profile = () => {
                 <div className='profilePanel'>
                     <h1>{profileData.lastname + " " + profileData.firstname}</h1>
                     <span><p>Plate:</p><button className='btn white-btn' onClick={handleModifPlate}>Modifier</button></span>
-                    <p style={{color: 'red'}}>{DeleteStatus.text}</p>
-                    {profileData.plates.map((plate, index)=><PlateButton key={index} value={plate} text={plate} onClick={handelDeletePlate} isDisabled={!canDeletePlate}/>)}
-                    {showAddPlate && <form className='addPlateForm' action={handleAddPlate}>
+                    {showAddPlate && <p style={{color: 'red'}}>{deleteStatus.text}</p>}
+                    <div className='plates'>
+                        {profileData.plates.map((plate, index)=><PlateButton key={index} value={plate} text={plate} onClick={handelDeletePlate} isDisabled={!canDeletePlate}/>)}
+                    </div>
+                    {showAddPlate && <form className='addPlateForm' onSubmit={handleAddPlate}>
                         <label htmlFor='newPlate'>Nouvelle Plaque</label>
                         <input id='newPlate' className='textarea' name='NewPlate' type='text' value={newPlate} onChange={handleChangeNewPlate} placeholder='VD12345' />
                         <input className='submit btn blue-btn' type='submit' value={"Ajouter la plaque d'immatriculation"} />
                     </form>}
-                    <p style={{color: 'red'}}>{newPlateStatus.text}</p>
+                    {showAddPlate && <p style={{color: 'red'}}>{newPlateStatus.text}</p>}
                 </div>
             ) : (
                 <p>Loading profile data...</p>
