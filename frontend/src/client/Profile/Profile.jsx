@@ -11,6 +11,7 @@ import { urlAPI } from '../../config';
 const Profile = () => {
     const [cookies] = useCookies(['client']);
     const [profileData, setProfileData] = useState(null);
+    const [profileStatus, setProfileStatus] = useState({code: 0, text: ""});
     const [deleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
     const {client, setClient} = useClient();
     const navigate = useNavigate();
@@ -25,8 +26,12 @@ const Profile = () => {
         } else if (client.value === ""){
             setClient(cookies.client);
         }
-        else{
-            APIGetRequest({url: `${urlAPI}/users/${client.value}`, setData: setProfileData, setStatus: ()=>{}});
+        if (client.value != ""){
+            APIGetRequest({url: `${urlAPI}/users/${client.value}`, setData: setProfileData, setStatus: setProfileStatus});
+            if(profileStatus && profileStatus.code === 401){
+                console.error(profileStatus.text);
+                navigate('/');
+            }
         }
     }, [client, navigate, newPlateStatus, deleteStatus]);
 
