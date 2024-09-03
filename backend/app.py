@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from argon2 import PasswordHasher
 import jwt
-import datetime
+import threading
+import ia
 import utils
 import stripe
 
@@ -17,15 +18,39 @@ CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "http://l
 SECRET_KEY = '0123456789876543210'
 ph = PasswordHasher()
 
-def create_jwt(email):
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-    token = jwt.encode({'email': email, 'exp': expiration}, SECRET_KEY, algorithm='HS256')
-    return token
+
+def check_Authorization(token, customer_id=None):
+    try:
+        if(customer_id is not None):
+            decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+            if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')):
+                return True
+        else:
+            return True
+        return False
+    except jwt.ExpiredSignatureError:
+        print("ExpiredSignature error")
+        return False
+    except jwt.InvalidTokenError:
+        print("InvalidToken error")
+        return False
+    except:
+        return False
+
+@app.route('/api/users/<id>/validation_jwt', methods=['GET'])
+def get_validationJWT(id):
+    if check_Authorization(request.cookies.get('access_token'), id):
+        return jsonify({'status': 'Authorized'}), 200
+    else:
+        return jsonify({'status': 'Unauthorized'}), 401
 
 
 @app.route('/api/users/', methods=['GET'])
 def get_users():
     """Handles requests to retrieve all users"""
+
+    if not check_Authorization(request.cookies.get('access_token'), 0):
+        return jsonify({'status': 'Unauthorized'}), 401
 
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
@@ -64,6 +89,9 @@ def get_users():
 @app.route('/api/users/<id>', methods=['GET'])
 def get_user(id):
     """Handles requests to retrieve user data based on the user ID."""
+
+    if not check_Authorization(request.cookies.get('access_token'), id):
+        return jsonify({'status': 'Unauthorized'}), 401
 
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
@@ -105,33 +133,43 @@ def get_user(id):
 def update_password(id):
     """Handles requests to change the password of a user."""
 
+    if not check_Authorization(request.cookies.get('access_token'), id):
+        return jsonify({'status': 'Unauthorized'}), 401
+
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
-            SELECT password
+            SELECT id, password
             FROM customers
             WHERE id = %s
         """
-        cursor.execute(query, (id,))
-        user_data = cursor.fetchone()
 
-        if user_data is None:
-            return jsonify({'status': 'User ID not found'}), 404
-            
         data = request.get_json()
 
-        if user_data[0] != data['password']:
-            return jsonify({'status': 'Incorrect user password'}), 403
+        cursor.execute(query, (id,))
+        result = cursor.fetchone()
+        
+        if result is None:
+            return jsonify({'status': 'User not found'}), 404
+        
+        (id, stored_hash) = result
 
-        query_customer = """def create_jwt(email):
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(days=7)
-    token = jwt.encode({'email': email, 'exp': expiration}, SECRET_KEY, algorithm='HS256')
-    return token
-            UPDATE customers
+        if id is None:
+            return jsonify({'status': 'User not found'}), 404
+        else:
+            try:
+                # Verify the password using Argon2
+                ph.verify(stored_hash, data.get('password'))
+            except:
+                return jsonify({'status': 'Invalid password'}), 401
+        
+        query_customer = """UPDATE customers
             SET password = %s
-            WHERE id = %s;
-        """
-        cursor.execute(query_customer, (data['new_password'], id,))
+            WHERE id = %s;"""
+        
+        # Hash du mot de passe
+        hashed_password = ph.hash(data.get('new_password'))
+        cursor.execute(query_customer, (hashed_password, id,))
 
         conn.commit()
 
@@ -146,6 +184,9 @@ def update_password(id):
 @app.route('/api/users/<id>/plate', methods=['POST'])
 def add_plate(id):
     """Handles requests to add a plate number."""
+
+    if not check_Authorization(request.cookies.get('access_token'), id):
+        return jsonify({'status': 'Unauthorized'}), 401
 
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
@@ -193,6 +234,9 @@ def add_plate(id):
 @app.route('/api/users/<id>/plate/<plate>', methods=['DELETE'])
 def remove_plate(id, plate):
     """Handles requests to remove a plate number."""
+
+    if not check_Authorization(request.cookies.get('access_token'), id):
+        return jsonify({'status': 'Unauthorized'}), 401
 
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
@@ -253,6 +297,7 @@ def _build_cors_preflight_response():
 @app.route('/api/sign_up', methods=['POST'])
 def set_user():
     """Handles requests to subscribe user data in the DB."""
+
     if request.method == 'OPTIONS':
         # CORS preflight request
         return _build_cors_preflight_response()
@@ -361,10 +406,10 @@ def sign_in():
             except:
                 return jsonify({'status': 'Invalid password'}), 401
             
-            expiration_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1, minutes=30)
+            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
-                'exp': expiration_time
+                'exp': expiration_time.strftime('%Y%m%d%H%M%S')
             }
             token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
             response = make_response(jsonify({'status': 'Login successful', 'id': id, 'jwt': token}))
@@ -419,14 +464,56 @@ def get_plate(plate_no):
 pendingIntent = {}
 stripe.api_key = "sk_test_51Pt6wyRvF3tg1R6w1sVcUO1Gfbgc2wJ8Wt5Q9zCyf4c0fg1Aa3EoSpRE6y0CmZGdtTFAqjCLuaCdv7vuQno2aTRF00d1TgZ1wv"
 
+@app.route('/api/create_payment_intent', methods=['POST'])
+def async_create_payment_intent():
+    data = request.json
+    amount = data['amount']
+    currency = data['currency']
+    tickets = data['ticket_id']
+    print(tickets)
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),  # amount should be in cents
+            currency=currency
+        )
+        pendingIntent[payment_intent['client_secret']] = tickets
+        return {"clientSecret": payment_intent['client_secret']}, 200
+    except Exception as e:
+        print(e);
+        return jsonify({'status': str(e)}), 500
+
+@app.route('/api/finish_payment_intent', methods=['POST'])
+def finish_payment_intent():
+    try:
+        data = request.json
+        payment_intent = data['payment_intent']
+        client_secret = data['payment_intent_client_secret']
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent)
+        if(payment_intent['status'] != 'succeeded'):
+            return {"status": "failed"}, 400
+        #pendingIntent[client_secret] = [3]
+        tickets = pendingIntent[client_secret]
+
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        ftickets = '('+str(tickets[0])+')' if len(tickets) == 1 else tuple(tickets)
+        query = "DELETE FROM logs WHERE id IN " + ftickets + ";"
+        cursor.execute(query)
+        conn.commit()
+        return {"status": "success"}, 200
+    except Exception as e:
+        print(e);
+        return jsonify({'status': str(e)}), 500
+
+
 @app.route('/api/hello', methods=['GET'])
-def hello_world():
+def hello():
     return jsonify(message="Hello, World!")
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="5000", debug=True)
-"""
-    from waitress import serve
-    serve(app, host="0.0.0.0", port="5000")
-"""
+if __name__ == '__main__':
+    ia_in = threading.Thread(target=ia.ia, args=('in',), daemon=False)
+    ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
+    ia_in.start()
+    ia_out.start()
+    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
+    ia_in.join()
+    ia_out.join()

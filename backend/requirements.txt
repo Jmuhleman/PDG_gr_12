@@ -1,9 +1,13 @@
+inference_sdk
+easyocr
 flask
 flask_cors
 pytest
 requests
 psycopg2
+easyocr
 datetime
 stripe
 argon2-cffi
 PyJWT
+thread

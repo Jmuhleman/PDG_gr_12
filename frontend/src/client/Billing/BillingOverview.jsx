@@ -29,20 +29,26 @@ export default function BillingOverview() {
 
     const {client, setClient} = useClient();
     const [profile, setProfile] = useState();
+    const [noData, setNoData] = useState(true);
 
     const navigate = useNavigate()
 
-    const showstatus = (e) => e;
     const handleSetProfile = (data) => {
         setProfile(data);
     }
 
     async function getProfileAndPlate() {
+        let status = {code: 0, text: ""};
+        const setStatus = (e) => status = e;
         await APIGetRequest({
             url: `${urlAPI}/users/${client.value}`,
             setData: handleSetProfile,
-            setStatus: showstatus
+            setStatus: setStatus
         });
+        if(status.code === 401) {
+            console.log("unAuthorized");
+            navigate('/');
+        }
     }
 
     useEffect(() => {
@@ -59,7 +65,9 @@ export default function BillingOverview() {
         if (profile) {
             const fetchPlates = async () => {
                 let platesData = {};
-                const assignPlate = (d) => Object.assign(platesData, d);
+                const assignPlate = (d) => {
+                    Object.assign(platesData, d)
+                };
                 let status = {code: 0, text: ""};
                 const setStatus = (e) => status = e;
 
@@ -73,6 +81,8 @@ export default function BillingOverview() {
                         if(status.code === 204) {
                             console.log(`Plate ${plate} has no billing data`);
                             assignPlate({[plate]: []});
+                        }else{
+                            setNoData(false)
                         }
                     })
                 );
@@ -152,7 +162,7 @@ export default function BillingOverview() {
                 })
             }
             <button className='btn white-btn' onClick={() => navigate('/')}>Retour</button>
-            { client.haveAccount && <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button> }
+            { client.haveAccount && !noData && <button className='btn blue-btn' onClick={handleOnClick({plate: [], idBill:[]})}>Payer Tout</button> }
             
             { selectedBill && showCheckout && <div className="checkoutBackground"><div className="checkoutPanel">
                 <h1>Récapitulatif et paiment</h1>
