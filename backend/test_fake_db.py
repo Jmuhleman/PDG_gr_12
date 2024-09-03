@@ -361,7 +361,7 @@ new_fares = [{
     'name': "le parking du blaireau",
     'fare' : 100},
     {
-        'parking_id' : 2,
+        'parking_id' : 4,
         'name': "olalal",
         'fare': -2
     }]

@@ -681,16 +681,16 @@ def patch_parking_fares_admin():
         data = request.get_json()
 
         for k in range(len(data)):
+            new_fare = 0;parking_id = ""
             for key, val in data[k].items():
-                if key == "parking_id":
-                    parking_id = val
-                elif key == 'fare':
-                    new_fare = val
+                parking_id = val if key == "parking_id" else parking_id
+                new_fare = val if key == "fare" else new_fare
+            
             cursor.execute(query, (new_fare, parking_id))
             
             if cursor.rowcount == 0:
                 conn.rollback() 
-                return jsonify({'status': 'Parking ID not found'}), 400
+                return jsonify({'status': 'Parking id not found'}), 400
 
         conn.commit()
 
