@@ -1,29 +1,18 @@
 import React, { useEffect, useState } from 'react';
-
-const data = [
-    {
-        name: 'Label 1',
-        id: 1,
-        fare: 123
-    },
-    {
-        name: 'Label 2',
-        id: 2,
-        fare: 123
-    },
-    {
-        name: 'Label 3',
-        id: 3,
-        fare: 123
-    }
-]
+import { APIGetRequest, APIPatchRequest } from '../../utils/APIRequest';
+import { urlAPI } from '../../config';
 
 const Fares = () => {
     const [fares, setFares] = useState([]);
+    const [status, setStatus] = useState({code: 0, text: ''});
 
-    useEffect(() => {
-        setFares(data);
+    useEffect( () => {
+        APIGetRequest({url: `${urlAPI}/admin/parking/fares`, setData: setFares, setStatus: setStatus});
     }, []);
+
+    const handleSubmit = () => {
+        APIPatchRequest({url: `${urlAPI}/admin/parking/fares`, data: fares, setStatus: setStatus});
+    }
 
     const handleChangeFares = (id, value) => {
         let newFares = fares
@@ -38,9 +27,12 @@ const Fares = () => {
         setFares(newFares);
     };
 
+    useEffect(() => {console.log(status.code)}, [status]);
+
     return (<>
         <h1>Tarif</h1>
-        <table>
+        <p style={{color: 'red'}}>{(status.code<200 || status.code >=300) && status.text}</p>
+        {fares.length !== 0 && <table>
             <thead>
                 <tr>
                     <th>Parking</th>
@@ -49,7 +41,7 @@ const Fares = () => {
             </thead>
             <tbody>
                 {
-                    fares && fares.map(fare => (
+                    fares.map(fare => (
                         <tr key={fare.id}>
                             <td>{fare.name}</td>
                             <td><input type="number" min='0' value={fare.fare} onChange={(e)=>handleChangeFares(fare.id, e.target.value)}/></td>
@@ -57,8 +49,9 @@ const Fares = () => {
                     ))
                 }
             </tbody>
-        </table>
+        </table>}
         <button className='btn white-btn' onClick={() => window.history.back()}>Retour</button>
+        {fares.length !== 0 && <button className='btn blue-btn' onClick={() => handleSubmit()}>Sauvegarder</button>}
     </>);
 };
 

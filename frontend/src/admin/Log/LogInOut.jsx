@@ -1,50 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 import './logInOut.css';
+import { APIGetRequest } from '../../utils/APIRequest';
 
 const LogInOut = () => {
-    const [data, setData] = useState([
-        {
-            "id" : 2,
-            "plate" : "GE654321",
-            "parking_id" : 2,
-            "timestamp_in" : "2024-08-26T08:00:00.000Z",
-            "timestamp_out" : "2024-08-26T13:00:00.000Z"
-        },
-        {
-            "id" : 3,
-            "plate" : "GE654321",
-            "parking_id" : 3,
-            "timestamp_in" : "2024-08-27T09:00:00.000Z",
-            "timestamp_out" : "2024-08-27T14:00:00.000Z"
-        },
-        {
-            "id" : 4,
-            "plate" : "GE14982",
-            "parking_id" : 2,
-            "timestamp_in" : "2024-08-24T10:00:00.000Z",
-            "timestamp_out" : "2024-08-24T10:30:15.000Z"
-        },
-        {
-            "id" : 5,
-            "plate" : "AI89012",
-            "parking_id" : 3,
-            "timestamp_in" : "2024-08-27T11:00:00.000Z",
-            "timestamp_out" : null
-        },
-        {
-            "id" : 6,
-            "plate" : "FR111222",
-            "parking_id" : 1,
-            "timestamp_in" : "2024-08-27T12:00:00.000Z",
-            "timestamp_out" : null
-        }
-    ]);
+    const [data, setData] = useState([]);
+    const [status, setStatus] = useState({code: 0, text: ''});
 
     const [logUnformatted, setLogUnformatted] = useState([]);
     const [log, setLog] = useState([]);
     const [sort, setSort] = useState('desc');
     const [search, setSearch] = useState("");
+
+    useEffect(() => {
+        APIGetRequest({url: `http://localhost:5000/admin/parking/`, setData: setData, setStatus: setStatus});
+    }, []);
     
     useEffect(() => {
         const UnformattedLog = data.flatMap(({plate, timestamp_in, timestamp_out}) => {
@@ -65,7 +35,7 @@ const LogInOut = () => {
             ];
         }).filter(({timestamp}) => timestamp !== null);
         setLogUnformatted(UnformattedLog);
-    }, []);
+    }, [data]);
 
     useEffect(() => {
         setLog(logUnformatted.sort((a, b) => a.timestamp < b.timestamp ? 1 : -1));
@@ -83,12 +53,13 @@ const LogInOut = () => {
     useEffect(() => {
         setLog(logUnformatted.filter(({plate}) => plate.includes(search)));
         console.log(log);
-    }, [search]);
+    }, [search, logUnformatted]);
 
     return (<>
         <h1>Log </h1>
-        <input type="text" onChange={(e)=>{setSearch(e.target.value)}} value={search} placeholder="Rechercher" />
-        <table>
+        <p style={{color: 'red'}}>{(status.code<200 || status.code >=300) && status.text}</p>
+        {log.length !== 0 && <input type="text" onChange={(e)=>{setSearch(e.target.value)}} value={search} placeholder="Rechercher" />}
+        {log.length !== 0 && <table>
             <thead>
                 <tr>
                     <th>Plaque</th>
@@ -105,7 +76,7 @@ const LogInOut = () => {
                     </tr>
                 ))}
             </tbody>
-        </table>
+        </table>}
         <button className='btn white-btn' onClick={() => window.history.back()}>Retour</button>
     </>);
 };
