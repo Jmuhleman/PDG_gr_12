@@ -58,6 +58,7 @@ const Fares = () => {
                 }
             </tbody>
         </table>
+        <button className='btn white-btn' onClick={() => window.history.back()}>Retour</button>
     </>);
 };
 

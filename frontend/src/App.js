@@ -10,6 +10,7 @@ import Profile from './client/Profile/Profile';
 import AdminHub from './admin/AdminHub/AdminHub';
 import LogInOut from './admin/Log/LogInOut';
 import Fares from './admin/fares/Fares';
+import ByPlate from './admin/byPlate/ByPlate';
 
 const router = createBrowserRouter([
     {
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "/admin/byPlate",
-                element: <h1>Par plaque</h1>,
+                element: <ByPlate />,
             }
         ],
     },
