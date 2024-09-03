@@ -168,10 +168,3 @@ def ia(mode):
     print("Processing of the video file is complete.")
 
 
-def start_ia_in():
-
-    ia('in')
-
-def start_ia_out():
-    
-    ia('out')

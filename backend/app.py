@@ -193,7 +193,6 @@ def get_plate(plate_no):
             result['amount'] = amount
             formatted_results[plate_no].append(result)
 
-### a voir avec la team frontend si renvoyer l'ID ici ou le placer dans les données de retour
         return jsonify(formatted_results), 200
 
     except Exception as e:
@@ -207,23 +206,15 @@ def get_plate(plate_no):
 
 @app.route('/api/hello/', methods=['GET'])
 def hello():
-    return jsonify(message= "hola"), 200
-    #return jsonify(message="Hello, World!")
+    return jsonify(message="Hello, World!")
 
 
 
 if __name__ == '__main__':
-    ia_in = threading.Thread(target=ia.start_ia_in, daemon=False)
-    ia_out = threading.Thread(target=ia.start_ia_out, daemon=True)
+    ia_in = threading.Thread(target=ia.ia, args=('in',), daemon=False)
+    ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
     ia_in.start()
     ia_out.start()
     app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
     ia_in.join()
     ia_out.join()
-
-
-
-
-
-
-
