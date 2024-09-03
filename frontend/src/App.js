@@ -5,6 +5,8 @@ import './App.css'; // Ensure the path is correct
 import { ClientProvider } from './client/hooks/useClient';
 import BillingOverview from './client/Billing/BillingOverview';
 import HomePage from './client/Home/HomePage';
+import PaymentSuccess from './client/Billing/PaymentSuccess';
+import Profile from './client/Profile/Profile';
 
 const router = createBrowserRouter([
     {
@@ -16,9 +18,17 @@ const router = createBrowserRouter([
                 element: <HomePage />,
             },
             {
-                path: "billing_overview",
+                path: "billingOverview",
                 element: <BillingOverview />,
             },
+            {
+                path: "billingSuccess",
+                element: <PaymentSuccess />,
+            },
+            {
+                path: "Profile",
+                element: <Profile />,
+            }
         ],
     },
     {
