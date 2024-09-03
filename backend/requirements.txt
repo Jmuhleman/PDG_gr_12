@@ -1,6 +1,5 @@
 inference_sdk
 easyocr
-random
 flask
 flask_cors
 pytest
