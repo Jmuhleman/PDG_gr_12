@@ -569,7 +569,7 @@ def get_parking_admin():
         user_data = cursor.fetchall()
         
         if user_data is None:
-            return jsonify({'status': 'No users found'}), 404
+            return jsonify({'status': 'No parking found'}), 404
 
         fields_plate = ['id', 'plate', 'parking_id', 'timestamp_in', 'timestamp_out']
         user_dict = utils.format_user(user_data, fields_plate)
@@ -624,6 +624,84 @@ def get_customer_admin(plate):
         return jsonify({'status': str(e)}), 500
     finally:
         utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/parking/fares', methods=['GET'])
+def get_parking_fares_admin():
+    """Handles query to retrieve parking fares"""
+
+    if not check_Authorization(request.cookies.get('access_token'), 0):
+        return jsonify({'status': 'Unauthorized'}), 401
+        
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            SELECT
+                parking_id,
+                name,
+                fare
+            FROM
+                fares
+                INNER JOIN parking ON parking_id = id
+        """
+        cursor.execute(query)
+        fares = cursor.fetchall()
+        
+        if fares is None:
+            return jsonify({'status': 'No parking'}), 404
+
+        fares_dict = utils.format_parking(fares)
+
+        return jsonify(fares_dict), 200
+
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+
+@app.route('/api/parking/fares', methods=['PATCH'])
+def patch_parking_fares_admin():
+    """Handles query to change the parking fares"""
+
+    if not check_Authorization(request.cookies.get('access_token'), id):
+        #return jsonify({'status': 'Unauthorized'}), 401
+        pass
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            UPDATE 
+                fares
+            SET
+                fare = %s
+            WHERE 
+                parking_id = %s;
+        """
+        data = request.get_json()
+
+        for fare_update in data:
+            parking_id = fare_update.get('parking_id')
+            new_fare   = fare_update.get('fare')
+        
+            cursor.execute(query, (new_fare, parking_id))
+            
+            if cursor.rowcount == 0:
+                conn.rollback() 
+                return jsonify({'status': 'Parking ID not found'}), 400
+
+        conn.commit()
+
+        return jsonify({'status': 'Parking fares update completed'}), 200
+    
+    except Exception as e:
+        if conn:
+            conn.rollback()  # En cas d'erreur, on annule les modifications
+        return jsonify({'status': str(e)}), 500
+    
+    finally:
+        utils.close_connection_db(cursor, conn)
+
 
 
 @app.route('/api/hello', methods=['GET'])

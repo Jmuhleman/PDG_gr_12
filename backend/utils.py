@@ -42,6 +42,25 @@ def format_user(user_data, *args):
     return usr_list
 
 
+def enumerate_parking(user, fields):
+    """Extract parking fields according to headers as a dictionary."""
+    parking_list = []
+
+    for record in user:
+        parking_dict = {fields[i]: record[i] for i in range(len(fields))}
+        parking_list.append(parking_dict)
+    return parking_list
+
+
+def format_parking(parking_data):
+    """Format parking information"""
+
+    fields = ['parking_id', 'parking_name', 'fare']
+    parking_list = enumerate_parking(parking_data, fields)
+
+    return parking_list
+
+
 def verify_fields(data):
     """Check that all fields of a dictionary are not None values"""
     for key, value in data.items():

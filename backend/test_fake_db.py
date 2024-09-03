@@ -11,7 +11,7 @@ base_url_admin_sign_in= 'http://127.0.0.1:5000/api/admin/sign_in'
 
 base_url_parking_id = 'http://127.0.0.1:5000/api/parking'
 base_url_users_plates= 'http://127.0.0.1:5000/api/users/plates/'
-base_url_parking_tarif = 'http://127.0.0.1:5000/api/parking/tarif'
+base_url_parking_fares = 'http://127.0.0.1:5000/api/parking/fares'
 base_url_parking_id_tarif = 'http://127.0.0.1:5000/api/parking/'
 base_url_customer_plate = 'http://127.0.0.1:5000/api/users/plates/'
 
@@ -40,7 +40,6 @@ def get_plate_data(plate_no):
         # Handle request errors
         print(f"Request error: {e}")
 
-
 def get_user(id):
     """Send a GET request to retrieve data for a given user"""
     url = f"{base_url_users}{id}"
@@ -63,7 +62,6 @@ def get_user(id):
         # Handle request errors
         print(f"Request error: {e}")
 
-
 def get_users():
     """Send a GET request to retrieve data for all users"""
     url = f"{base_url_users}"
@@ -85,7 +83,6 @@ def get_users():
     except requests.RequestException as e:
         # Handle request errors
         print(f"Request error: {e}")
-
 
 def post_user(new_data):
     """Send POST request to API to sign in a new user"""
@@ -110,7 +107,6 @@ def post_user(new_data):
 
     except requests.RequestException as e:
         print(f"Request error: {e}")
-
 
 def udpate_password(id, old_password, new_password):
     """Send PATCH request to API to change password for a user"""
@@ -140,7 +136,6 @@ def udpate_password(id, old_password, new_password):
     except requests.RequestException as e:
         print(f"Request error: {e}")
 
-
 def add_plate(id, new_plate):
     """Send POST request to add a plate for a user"""
     
@@ -166,7 +161,6 @@ def add_plate(id, new_plate):
 
     except requests.RequestException as e:
         print(f"Request error: {e}")
-
 
 def remove_plate(id, delete_plate):
     """Send DELETE request to API to delete a plate"""
@@ -194,7 +188,6 @@ def remove_plate(id, delete_plate):
     except requests.RequestException as e:
         print(f"Request error: {e}")
 
-
 def sign_up(email, password):
     """Send GET customer request to API to sign in"""
     
@@ -217,7 +210,6 @@ def sign_up(email, password):
 
     except requests.RequestException as e:
         print(f"Request error: {e}")
-
 
 def admin_sign_in(email, password):
     """Send POST admin request to API to sign in"""
@@ -243,7 +235,6 @@ def admin_sign_in(email, password):
 
     except requests.RequestException as e:
         print(f"Request error: {e}")
-
 
 def get_logs():
     """Send a GET request to retrieve logs (pending invoices)"""
@@ -290,6 +281,52 @@ def get_customer_admin():
         print(f"Request error: {e}")
 
 
+def get_fares():
+    """Send GET query to API to get parking fares"""
+
+    url = f"{base_url_parking_fares}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            print(data)
+        
+        elif response.status_code == 404:
+            print(data.get('status', 'Error 404'))
+
+        else:
+            print(f"{response.status_code} - {response.text}")
+    
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+
+def patch_fares(new_fares):
+    """Send PATCH query to API to update parking fares"""
+
+    url = f"{base_url_parking_fares}"
+
+    try:
+        response = requests.patch(url, json=new_fares)
+        data = response.json()
+
+        if response.status_code == 201:
+            print("Fares updated successfully.")
+        
+        elif response.status_code == 400:
+            print(data.get('status', 'Error 400 - Bad Request'))
+        
+        elif response.status_code == 401:
+            print(data.get('status', 'Error 403 - Forbidden'))
+
+        else:
+            print(f"{response.status_code} - {response.text}")
+    
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+
+
 
 """"
 Mock data to query the backend
@@ -318,6 +355,12 @@ new_user_data = {
     "plate": "BS23454"
 }
 
+
+new_fares = {
+    'parking_id' : 1,
+    'name': "le parking du blaireau",
+    'fare' : 100
+}
 # Test cases for query a plate without login
 
 for plate_no in plate_numbers:
@@ -355,3 +398,7 @@ for id in ids:
 
 # test customer from plate no
 # get_customer_admin()
+
+# test parking fares
+#get_fares()
+patch_fares
