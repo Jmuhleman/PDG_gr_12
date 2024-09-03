@@ -505,7 +505,7 @@ def finish_payment_intent():
         return jsonify({'status': str(e)}), 500
 
 
-@app.route('/api/hello/', methods=['GET'])
+@app.route('/api/hello', methods=['GET'])
 def hello():
     return jsonify(message="Hello, World!")
 
