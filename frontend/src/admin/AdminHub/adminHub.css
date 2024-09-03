@@ -1,0 +1,82 @@
+.PanelAdmin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f2f2f2;
+    padding: 20px;
+    text-decoration: none;
+    * {
+        margin: 10px;
+        width: 30%;
+        text-align: center;
+        * {
+            color: #fff;
+            width: 100%;
+            margin: 4em auto;
+        }
+    }
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.log-btn {
+    background-color: #ff0000;
+}
+
+.log-btn:hover {
+    background-color: #cc0000;
+}
+
+.byPlate-btn {
+    background-color: #00ff00;
+}
+
+.byPlate-btn:hover {
+    background-color: #00cc00;
+}
+
+.fares-btn {
+    background-color: #0000ff;
+}
+
+.fares-btn:hover {
+    background-color: #0000cc;
+}
+
+.logout {
+    margin-top: 1em;
+}
+
+.btn {
+    padding: 8px 16px; /* Reduced padding for smaller buttons */
+    border-radius: 4px; /* Slightly rounded corners */
+    border: none; /* No border */
+    font-size: 0.9rem; /* Slightly smaller font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.blue-btn {
+    background-color: #007bff; /* Primary blue color to match form button */
+    color: #fff; /* White text */
+}
+
+.blue-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+
+.white-btn {
+    background-color: #E1ECF7; /* Light blue background for contrast */
+    color: #007bff; /* Primary blue text color */
+}
+
+.white-btn:hover {
+    background-color: #bcd9f7; /* Slightly darker shade on hover */
+}
