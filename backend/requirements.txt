@@ -1,3 +1,4 @@
+inference_sdk
 flask
 flask_cors
 pytest
