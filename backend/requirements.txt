@@ -1,4 +1,5 @@
 inference_sdk
+easyocr
 flask
 flask_cors
 pytest
