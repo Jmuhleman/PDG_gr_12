@@ -356,11 +356,15 @@ new_user_data = {
 }
 
 
-new_fares = {
+new_fares = [{
     'parking_id' : 1,
     'name': "le parking du blaireau",
-    'fare' : 100
-}
+    'fare' : 100},
+    {
+        'parking_id' : 2,
+        'name': "olalal",
+        'fare': -2
+    }]
 # Test cases for query a plate without login
 
 for plate_no in plate_numbers:
@@ -401,4 +405,4 @@ for id in ids:
 
 # test parking fares
 #get_fares()
-patch_fares
+patch_fares(new_fares)

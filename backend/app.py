@@ -680,10 +680,12 @@ def patch_parking_fares_admin():
         """
         data = request.get_json()
 
-        for fare_update in data:
-            parking_id = fare_update.get('parking_id')
-            new_fare   = fare_update.get('fare')
-        
+        for k in range(len(data)):
+            for key, val in data[k].items():
+                if key == "parking_id":
+                    parking_id = val
+                elif key == 'fare':
+                    new_fare = val
             cursor.execute(query, (new_fare, parking_id))
             
             if cursor.rowcount == 0:
