@@ -10,12 +10,12 @@ function SubmitForm({
   fieldsConfig = [], // Default to an empty array if no configuration is provided
   extraButton = null,
   layout = 'single-column', // Default to single-column layout
-  message = "",
+  message = '',
   errorMsg = ''
 }) {
 
-  const [erroDisplayed, setErrorDisplayed] = useState('');
-  erroDisplayed;
+  const [errorDisplayed, setErrorDisplayed] = useState("");
+
 
 
   // Initialize state with an object to manage multiple inputs
@@ -39,7 +39,7 @@ function SubmitForm({
   // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-    if(error != '') {
+    if(errorMsg != '') {
       setErrorDisplayed(errorMsg);
       return};
     if(areAllFieldsFilled){
