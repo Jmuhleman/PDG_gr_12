@@ -11,6 +11,7 @@ import AdminHub from './admin/AdminHub/AdminHub';
 import LogInOut from './admin/Log/LogInOut';
 import Fares from './admin/fares/Fares';
 import ByPlate from './admin/byPlate/ByPlate';
+import AuthRoute from './admin/components/AuthRoute';
 
 const router = createBrowserRouter([
     {
@@ -37,7 +38,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <Outlet />,
+        element: <AuthRoute />,
         children: [
             {
                 path: "/admin",
