@@ -4,6 +4,7 @@ flask_cors
 pytest
 requests
 psycopg2
+easyocr
 datetime
 stripe
 argon2-cffi
