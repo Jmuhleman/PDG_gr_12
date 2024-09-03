@@ -11,8 +11,12 @@ function SubmitForm({
   extraButton = null,
   layout = 'single-column', // Default to single-column layout
   message = "",
-  errorMsg = ""
+  errorMsg = ''
 }) {
+
+  const [erroDisplayed, setErrorDisplayed] = useState('');
+  erroDisplayed;
+
 
   // Initialize state with an object to manage multiple inputs
   const [formData, setFormData] = useState(
@@ -31,7 +35,6 @@ function SubmitForm({
       [name]: value,
     });
   };
- const [erroDisplayed, setErrorDisplayed] = useState(errorMsg);
 
   // Handle form submission
   const handleSubmit = (event) => {

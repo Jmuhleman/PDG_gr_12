@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import Select from 'react-select';
+import countryList from 'react-select-country-list';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
@@ -9,7 +11,9 @@ import './home.css';
 import { APIPostRequest } from '../../utils/APIRequest';
 import { urlAPI } from '../../config';
 import { validatePassword } from '../../utils/PasswordValidation';
-import { countries } from 'countries-list';
+
+
+
 
 function Home() {
   // Form field configurations
@@ -31,7 +35,7 @@ function Home() {
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
     { 
       id: 'country', label: "Pays :", type: 'select', placeholder: '', className: 'fill',
-      options: countries  // Use dynamically generated countries list
+      options:  useMemo(() => countryList().getData(), [])  // Use dynamically generated countries list
     },
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
@@ -46,11 +50,11 @@ function Home() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [signInStatus, setSignInStatus] = useState({code: 0, text: ""});
   const [signUpStatus, setSignUpStatus] = useState({code: 0, text: ""});
-  const [signInData, setSignInData] = useState(undefined);
+  const [signInData, setSignInData] = useState('');
   // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['client']);
   const { setClient } = useClient();
-  const [errorMsg, setErrorMsg] = "";
+  const [errorMsg, setErrorMsg] =  useState('');
   const navigate = useNavigate();
 
   // Initialize cookies and client state
