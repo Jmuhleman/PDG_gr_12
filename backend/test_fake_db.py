@@ -7,6 +7,14 @@ base_url_users = 'http://127.0.0.1:5000/api/users/'
 base_url_post_user = 'http://127.0.0.1:5000/api/sign_up/'
 base_url_sign_in = 'http://127.0.0.1:5000/api/sign_in'
 
+base_url_admin_sign_in= 'http://127.0.0.1:5000/api/admin/sign_in'
+
+base_url_parking_id = 'http://127.0.0.1:5000/api/parking'
+base_url_users_plates= 'http://127.0.0.1:5000/api/users/plates/'
+base_url_parking_tarif = 'http://127.0.0.1:5000/api/parking/tarif'
+base_url_parking_id_tarif = 'http://127.0.0.1:5000/api/parking/'
+base_url_customer_plate = 'http://127.0.0.1:5000/api/users/plates/'
+
 #jwt_token = '123'
 #header, payload, signature = jwt_token.split('.')
 
@@ -187,8 +195,8 @@ def remove_plate(id, delete_plate):
         print(f"Request error: {e}")
 
 
-def sign_in(email, password):
-    """Send GET request to API to sign in a new user"""
+def sign_up(email, password):
+    """Send GET customer request to API to sign in"""
     
     url = base_url_sign_in
 
@@ -209,6 +217,79 @@ def sign_in(email, password):
 
     except requests.RequestException as e:
         print(f"Request error: {e}")
+
+
+def admin_sign_in(email, password):
+    """Send POST admin request to API to sign in"""
+
+    url = base_url_admin_sign_in
+
+    try:
+        user_data = {'email': email}
+        user_data['password'] = password
+        response = requests.post(url, json=user_data)
+        data = response.json()
+
+        if response.status_code == 200:
+            print("User signed in:")
+            print(data.get('jwt'))
+
+        elif response.status_code == 404:
+            print(data.get('status', 'Error 404'))
+        elif response.status_code == 401:
+            print(data.get('status', 'Error 401'))
+        else:
+            print(f"{response.status_code} - {response.text}")
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+
+
+def get_logs():
+    """Send a GET request to retrieve logs (pending invoices)"""
+    url = f"{base_url_parking_id}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            print(data)
+
+        elif response.status_code == 404:
+            print(data.get('status', 'error 404'))
+
+        else:
+            # Other errors
+            print(f"{response.status_code} - {response.text}")
+    
+    except requests.RequestException as e:
+        # Handle request errors
+        print(f"Request error: {e}")
+
+def get_customer_admin():
+    """Send a GET request to retrieve the customer from a plate number"""
+    url = f"{base_url_customer_plate}WC123"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            print(data)
+
+        elif response.status_code == 404:
+            print(data.get('status', 'error 404'))
+
+        else:
+            # Other errors
+            print(f"{response.status_code} - {response.text}")
+    
+    except requests.RequestException as e:
+        # Handle request errors
+        print(f"Request error: {e}")
+
+
 
 """"
 Mock data to query the backend
@@ -264,7 +345,13 @@ for id in ids:
 # remove_plate(1, 'VD12345')
 
 # test sign_in function
-# sign_in('john.wayne@western.ch1', 'Wayne$123')
+# sign_up('john.wayne@western.ch1', 'Wayne$123')
 
+# test case admin sign in
+#admin_sign_in('admin@plateeyes.ch', 'admin')
 
+# test case for pending invoices
+# get_logs()
 
+# test customer from plate no
+# get_customer_admin()

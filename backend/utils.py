@@ -22,19 +22,23 @@ def enumerate_fields(user, fields, fields_address):
     return user_dict
 
 
-def format_user(user_data):
+def format_user(user_data, *args):
     """Format single or multi-user information"""
 
     fields = ['id', 'lastname', 'firstname', 'address', 'phone', 'email', 'password', 'plates']
     fields_address = ['street', 'number', 'city', 'zip', 'country']
+    usr_list = []
+
     if isinstance(user_data, tuple):
         usr_list = enumerate_fields(user_data, fields, fields_address)
+
     else:
-        print('list')
-        usr_list = []
+        var = args[0] if args[0] else fields
+
         for user in user_data:
-            usr_dict = enumerate_fields(user, fields, fields_address)
+            usr_dict = enumerate_fields(user, var, fields_address)   
             usr_list.append(usr_dict)
+
     return usr_list
 
 

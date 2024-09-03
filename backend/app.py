@@ -23,7 +23,7 @@ def check_Authorization(token, customer_id=None):
     try:
         if(customer_id is not None):
             decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')):
+            if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')):
                 return True
         else:
             return True
@@ -92,7 +92,6 @@ def get_user_id(id):
 
     if not check_Authorization(request.cookies.get('access_token'), id):
         return jsonify({'status': 'Unauthorized'}), 401
-
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
@@ -111,7 +110,7 @@ def get_user_id(id):
         WHERE
             id = %s
         GROUP BY
-            id,lastname, firstname, street, number, city, zip, country, phone, email, password;
+            id, lastname, firstname, street, number, city, zip, country, phone, email, password;
         """
         cursor.execute(query, (id,))
         user_data = cursor.fetchone()
@@ -120,6 +119,7 @@ def get_user_id(id):
             return jsonify({'status': 'User ID not found'}), 404
 
         user_dict = utils.format_user(user_data)
+        user_dict.pop('password')
 
         return jsonify(user_dict), 200
     
@@ -406,7 +406,7 @@ def sign_in_customer():
             except:
                 return jsonify({'status': 'Invalid password'}), 401
             
-            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1, minutes=30)
+            expiration_time = datetime.now(datetime.timezone.utc) + timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
                 'admin': False,
@@ -452,7 +452,7 @@ def sign_in_admin():
                 ph.verify(stored_hash, data.get('password'))
             except:
                 return jsonify({'status': 'Invalid password'}), 401
-            
+                
             expiration_time = datetime.now(timezone.utc) + timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
@@ -552,30 +552,18 @@ def finish_payment_intent():
         return jsonify({'status': str(e)}), 500
 
 
-@app.route('/api/parking/<id>', methods=['GET'])
-def get_user():
-    """Handles requests to retrieve all users"""
+@app.route('/api/parking', methods=['GET'])
+def get_parking_admin():
+    """Handles query to retrieve all users"""
 
     if not check_Authorization(request.cookies.get('access_token'), 0):
         return jsonify({'status': 'Unauthorized'}), 401
-
+        
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
-        SELECT
-            id,
-            lastname,
-            firstname,
-            ARRAY[street, number, city, zip, country] AS address,
-            phone,
-            email,
-            password,
-            ARRAY_AGG(plate ORDER BY plate) AS plates
-        FROM
-            customers
-            INNER JOIN plate_numbers ON id = customer_id
-        GROUP BY
-            id, lastname, firstname, street, number, city, zip, country, phone, email, password;
+        SELECT *
+        FROM logs
         """
         cursor.execute(query)
         user_data = cursor.fetchall()
@@ -583,7 +571,52 @@ def get_user():
         if user_data is None:
             return jsonify({'status': 'No users found'}), 404
 
+        fields_plate = ['id', 'plate', 'parking_id', 'timestamp_in', 'timestamp_out']
+        user_dict = utils.format_user(user_data, fields_plate)
+        
+        return jsonify(user_dict), 200
+    
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/users/plates/<plate>', methods=['GET'])
+def get_customer_admin(plate):
+    """Handles query to retrieve the customer info of a user from its plate number"""
+
+    if not check_Authorization(request.cookies.get('access_token'), 0):
+        return jsonify({'status': 'Unauthorized'}), 401
+
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            SELECT
+                id,
+                lastname,
+                firstname,
+                ARRAY[street, number, city, zip, country] AS address,
+                phone,
+                email,
+                password,
+                ARRAY_AGG(plate ORDER BY plate) AS plates
+            FROM
+                customers
+                INNER JOIN plate_numbers ON id = customer_id
+            WHERE
+                plate = %s
+            GROUP BY
+                id, lastname, firstname, street, number, city, zip, country, phone, email, password;   
+        """
+        cursor.execute(query, (plate,))
+        user_data = cursor.fetchone()
+        
+        if user_data is None:
+            return jsonify({'status': 'No customer with that plate'}), 404
+
         user_dict = utils.format_user(user_data)
+        user_dict.pop('password')
 
         return jsonify(user_dict), 200
     
@@ -591,6 +624,7 @@ def get_user():
         return jsonify({'status': str(e)}), 500
     finally:
         utils.close_connection_db(cursor, conn)
+
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
