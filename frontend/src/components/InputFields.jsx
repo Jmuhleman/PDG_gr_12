@@ -16,7 +16,7 @@ function InputFields({ formData, handleChange, fieldsConfig }) {
               onChange={handleChange}
               className="form-select"
             >
-              <option value="">{`Sélectionner le ${placeholder}`}</option>
+              <option value="">{`Sélectionner ${placeholder}`}</option>
               {options && options.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}

@@ -39,7 +39,7 @@ function Home() {
     { id: 'zip', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
     { 
-      id: 'country', label: "Pays :", type: 'select', placeholder: 'pays', className: 'fill',
+      id: 'country', label: "Pays :", type: 'select', placeholder: 'le pays', className: 'full-width',
       options:  useMemo(() => {
         return Object.entries(countries.getNames("fr", { select: "official" })).map(([value, label]) => ({
           value,
@@ -50,7 +50,7 @@ function Home() {
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
     { id: 'password', label: "Mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
-    { id: 'confirmation', label: "Confirmer le mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
+    { id: 'confirmation', label: "Confirmer le mot de passe :", type: '', placeholder: '', className: 'full-width' },
     { id: 'plate', label: "Numéro de plaque :", type: 'text', placeholder: 'VD09815...', className: 'full-width' }
   ];
   
@@ -108,6 +108,7 @@ function Home() {
   };
 
   const handleLogin = async ({email, password}) => {
+   
     const formData = {"email": email, "password": password};
     console.log('Login form submitted:', formData);
     // Add actual login logic here
@@ -135,15 +136,60 @@ function Home() {
     }
   }, [signInStatus]);
 
+
+
+
+  const isValidPhoneNumber = (input, minDigits, maxDigits) => {
+    // Regular expression to match only numbers with an optional leading +, and enforce min and max digits
+    const regex = new RegExp(`^\\+?\\d{${minDigits},${maxDigits}}$`);
+    return regex.test(input);
+}
+const isValidEmail = (email) => {
+  // Regular expression for validating an email
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
   const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate, confirmation}) => {
    if (password =! confirmation){
     setErrorMsg("Les mots de passe ne sont pas identiqur");
     return;
    }
    if (!validatePassword(password)) {
-    setErrorMsg("")
-    
+    setErrorMsg("");
+    return;
    }
+ const minDigitsPhone = 8;  // Minimum number of digits allowed
+ const maxDigitsPhone = 16;  // Maximum number of digits allowed
+   if (!isValidPhoneNumber(phone, minDigitsPhone, maxDigitsPhone)) {
+    setErrorMsg(""); 
+    return;
+   }
+
+   const params = {lastname, firstname, street, town, zip, phone, email};
+   for (const [key, value] of Object.entries(params)) {
+    if (typeof value === 'string' && value.length < 2) {
+        setErrorMsg(`${key} must be at least 2 characters long`);
+        return;
+    }
+  }
+    if(plate.length > 6 ){
+      setErrorMsg("a");
+      return;
+    }
+
+    if(phone.length  < 9){
+      setErrorMsg("b");
+      return;
+    }
+    if(!isValidEmail(email)){
+      setErrorMsg("c");
+      return;
+    }
+  
+
+
+
    
    
    
