@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from argon2 import PasswordHasher
 import jwt
-import datetime
+import threading
+import ia
 import utils
 import stripe
 
@@ -42,6 +43,7 @@ def get_validationJWT(id):
         return jsonify({'status': 'Authorized'}), 200
     else:
         return jsonify({'status': 'Unauthorized'}), 401
+
 
 @app.route('/api/users/', methods=['GET'])
 def get_users():
@@ -503,14 +505,15 @@ def finish_payment_intent():
         return jsonify({'status': str(e)}), 500
 
 
-@app.route('/api/hello', methods=['GET'])
-def hello_world():
+@app.route('/api/hello/', methods=['GET'])
+def hello():
     return jsonify(message="Hello, World!")
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="5000", debug=True)
-"""
-    from waitress import serve
-    serve(app, host="0.0.0.0", port="5000")
-"""
+if __name__ == '__main__':
+    ia_in = threading.Thread(target=ia.ia, args=('in',), daemon=False)
+    ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
+    ia_in.start()
+    ia_out.start()
+    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
+    ia_in.join()
+    ia_out.join()
