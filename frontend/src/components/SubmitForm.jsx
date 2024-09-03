@@ -11,11 +11,16 @@ function SubmitForm({
   extraButton = null,
   layout = 'single-column', // Default to single-column layout
   message = "",
-  message2 = ""
+  errorMsg = ""
 }) {
+
   // Initialize state with an object to manage multiple inputs
   const [formData, setFormData] = useState(
     fieldsConfig.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {})
+  );
+
+  const areAllFieldsFilled = Object.values(formData).every(
+    (value) => value !== '' && value !== null && value !== undefined
   );
 
   // Update state based on input field name
@@ -26,12 +31,19 @@ function SubmitForm({
       [name]: value,
     });
   };
+ const [erroDisplayed, setErrorDisplayed] = useState(errorMsg);
 
-  const[useMessage, setMessageUse] = false;
   // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-  
+    if(error != '') {
+      setErrorDisplayed(errorMsg);
+      return};
+    if(areAllFieldsFilled){
+      setErrorDisplayed('There are empty fields');
+      return;
+    }
+    setErrorDisplayed('');
     onSubmit(formData); // Call the custom submit handler with the current form data
   };
 
@@ -47,6 +59,7 @@ function SubmitForm({
           layout={layout} // Pass layout prop
         />
         <p className='message'>{message}</p>
+        <p className='error'>{errorDisplayed}</p>
         <button type="submit" className="submit-button">
           {buttonText}
         </button>

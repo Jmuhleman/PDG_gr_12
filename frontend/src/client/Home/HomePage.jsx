@@ -6,8 +6,10 @@ import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
-import { APIPostRequestWithoutCredentials } from '../../utils/APIRequest';
+import { APIPostRequest } from '../../utils/APIRequest';
 import { urlAPI } from '../../config';
+import { validatePassword } from '../../utils/PasswordValidation';
+import { countries } from 'countries-list';
 
 function Home() {
   // Form field configurations
@@ -27,7 +29,10 @@ function Home() {
     { id: 'number', label: "Numéro :", type: 'text', placeholder: '', className: 'small' },
     { id: 'zip', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
-    { id: 'country', label: "Pays :", type: 'text', placeholder: '', className: 'fill' },
+    { 
+      id: 'country', label: "Pays :", type: 'select', placeholder: '', className: 'fill',
+      options: countries  // Use dynamically generated countries list
+    },
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
     { id: 'password', label: "Mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
@@ -45,6 +50,7 @@ function Home() {
   // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['client']);
   const { setClient } = useClient();
+  const [errorMsg, setErrorMsg] = "";
   const navigate = useNavigate();
 
   // Initialize cookies and client state
@@ -174,7 +180,8 @@ function Home() {
           fieldsConfig={SignUpConfig}
           onSubmit={handleSignUp}
           extraButton={ReturnButton}
-          message={(signUpStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signUpStatus.text : ''}
+          message={(signUpStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signUpStatus.text : ''}       
+          errorMsg= {errorMsg}
         />
       )}
 
