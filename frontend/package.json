@@ -11,6 +11,7 @@
     "@testing-library/user-event": "^13.5.0",
     "argon2": "^0.41.0",
     "axios": "^1.7.4",
+    "country-list": "^2.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.35.0",
     "jsonify": "^0.0.1",
@@ -20,6 +21,8 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.1",
     "react-scripts": "^5.0.1",
+    "react-select": "^5.8.0",
+    "react-select-country-list": "^2.2.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

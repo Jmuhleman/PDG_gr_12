@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import Select from 'react-select';
+import countryList from 'react-select-country-list';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
@@ -6,8 +8,12 @@ import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
-import { APIPostRequestWithoutCredentials } from '../../utils/APIRequest';
+import { APIPostRequest } from '../../utils/APIRequest';
 import { urlAPI } from '../../config';
+import { validatePassword } from '../../utils/PasswordValidation';
+
+
+
 
 function Home() {
   // Form field configurations
@@ -27,7 +33,10 @@ function Home() {
     { id: 'number', label: "Numéro :", type: 'text', placeholder: '', className: 'small' },
     { id: 'zip', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
-    { id: 'country', label: "Pays :", type: 'text', placeholder: '', className: 'fill' },
+    { 
+      id: 'country', label: "Pays :", type: 'select', placeholder: '', className: 'fill',
+      options:  useMemo(() => countryList().getData(), [])  // Use dynamically generated countries list
+    },
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
     { id: 'password', label: "Mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
@@ -41,10 +50,11 @@ function Home() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [signInStatus, setSignInStatus] = useState({code: 0, text: ""});
   const [signUpStatus, setSignUpStatus] = useState({code: 0, text: ""});
-  const [signInData, setSignInData] = useState(undefined);
+  const [signInData, setSignInData] = useState('');
   // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['client']);
   const { setClient } = useClient();
+  const [errorMsg, setErrorMsg] =  useState('');
   const navigate = useNavigate();
 
   // Initialize cookies and client state
@@ -174,7 +184,8 @@ function Home() {
           fieldsConfig={SignUpConfig}
           onSubmit={handleSignUp}
           extraButton={ReturnButton}
-          message={(signUpStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signUpStatus.text : ''}
+          message={(signUpStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signUpStatus.text : ''}       
+          errorMsg= {errorMsg}
         />
       )}
 
