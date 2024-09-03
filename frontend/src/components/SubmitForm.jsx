@@ -10,7 +10,8 @@ function SubmitForm({
   fieldsConfig = [], // Default to an empty array if no configuration is provided
   extraButton = null,
   layout = 'single-column', // Default to single-column layout
-  message = ""
+  message = "",
+  message2 = ""
 }) {
   // Initialize state with an object to manage multiple inputs
   const [formData, setFormData] = useState(
@@ -26,9 +27,11 @@ function SubmitForm({
     });
   };
 
+  const[useMessage, setMessageUse] = false;
   // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
+  
     onSubmit(formData); // Call the custom submit handler with the current form data
   };
 
@@ -66,7 +69,8 @@ SubmitForm.propTypes = {
   })).isRequired,
   extraButton: PropTypes.element,
   layout: PropTypes.oneOf(['single-column', 'two-column']), // Determine layout type
-  message: PropTypes.string
+  message: PropTypes.string,
+  message2: PropTypes.string
 };
 
 export default SubmitForm;
