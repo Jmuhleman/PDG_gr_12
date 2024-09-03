@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import Select from 'react-select';
 import countryList from 'react-select-country-list';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
@@ -8,9 +7,15 @@ import AuthButtons from '../../components/AuthButtons';
 import { useClient } from '../hooks/useClient';
 import { useNavigate } from 'react-router-dom';
 import './home.css';
-import { APIPostRequest } from '../../utils/APIRequest';
+import { APIPostRequestWithoutCredentials } from '../../utils/APIRequest';
 import { urlAPI } from '../../config';
 import { validatePassword } from '../../utils/PasswordValidation';
+import countries from 'i18n-iso-countries';
+
+// Import French locale data
+import frLocale from 'i18n-iso-countries/langs/fr.json';
+
+countries.registerLocale(frLocale);
 
 
 
@@ -34,8 +39,13 @@ function Home() {
     { id: 'zip', label: "NPA :", type: 'text', placeholder: '', className: 'small' },
     { id: 'town', label: "Ville :", type: 'text', placeholder: '', className: 'fill' },
     { 
-      id: 'country', label: "Pays :", type: 'select', placeholder: '', className: 'fill',
-      options:  useMemo(() => countryList().getData(), [])  // Use dynamically generated countries list
+      id: 'country', label: "Pays :", type: 'select', placeholder: 'pays', className: 'fill',
+      options:  useMemo(() => {
+        return Object.entries(countries.getNames("fr", { select: "official" })).map(([value, label]) => ({
+          value,
+          label
+        }));
+      }, [])
     },
     { id: 'phone', label: "Numéro de téléphone :", type: 'tel', placeholder: '', className: 'full-width' },
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
@@ -125,7 +135,18 @@ function Home() {
     }
   }, [signInStatus]);
 
-  const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate}) => {
+  const handleSignUp = async ({lastname, firstname, street, number, town, zip, country, phone, email, password, plate, confirmation}) => {
+   if (password =! confirmation){
+    setErrorMsg("Les mots de passe ne sont pas identiqur");
+    return;
+   }
+   if (!validatePassword(password)) {
+    setErrorMsg("")
+    
+   }
+   
+   
+   
     const formData = {
       "lastname": lastname,
       "firstname": firstname,
