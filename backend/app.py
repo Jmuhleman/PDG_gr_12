@@ -666,8 +666,8 @@ def patch_parking_fares_admin():
     """Handles query to change the parking fares"""
 
     if not check_Authorization(request.cookies.get('access_token'), id):
-        #return jsonify({'status': 'Unauthorized'}), 401
-        pass
+        return jsonify({'status': 'Unauthorized'}), 401
+        
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
@@ -711,10 +711,10 @@ def hello():
     return jsonify(message="Hello, World!")
 
 if __name__ == '__main__':
-    #ia_in = threading.Thread(target=ia.ia, args=('in',), daemon=False)
-    #ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
-    #ia_in.start()
-    #ia_out.start()
-    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
-    #ia_in.join()
-    #ia_out.join()
+    ia_in = threading.Thread(target=ia.ia, args=('in',), daemon=False)
+    ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
+    ia_in.start()
+    ia_out.start()
+    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug=false indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
+    ia_in.join()
+    ia_out.join()

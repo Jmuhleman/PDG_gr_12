@@ -405,4 +405,4 @@ for id in ids:
 
 # test parking fares
 #get_fares()
-patch_fares(new_fares)
+# patch_fares(new_fares)
