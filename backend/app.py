@@ -21,8 +21,11 @@ ph = PasswordHasher()
 
 def check_Authorization(token, customer_id=None):
     try:
-        if(customer_id is not None):
-            decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        if(customer_id == -1):
+            if(decode['admin'] and decode['exp'] > datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')):
+                return True
+        elif(customer_id is not None):
             if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')):
                 return True
         else:
@@ -517,7 +520,6 @@ def async_create_payment_intent():
     amount = data['amount']
     currency = data['currency']
     tickets = data['ticket_id']
-    print(tickets)
     try:
         payment_intent = stripe.PaymentIntent.create(
             amount=int(amount * 100),  # amount should be in cents
@@ -526,7 +528,6 @@ def async_create_payment_intent():
         pendingIntent[payment_intent['client_secret']] = tickets
         return {"clientSecret": payment_intent['client_secret']}, 200
     except Exception as e:
-        print(e)
         return jsonify({'status': str(e)}), 500
 
 @app.route('/api/finish_payment_intent', methods=['POST'])
@@ -548,7 +549,6 @@ def finish_payment_intent():
         conn.commit()
         return {"status": "success"}, 200
     except Exception as e:
-        print(e)
         return jsonify({'status': str(e)}), 500
 
 
@@ -556,7 +556,7 @@ def finish_payment_intent():
 def get_parking_admin():
     """Handles query to retrieve all users"""
 
-    if not check_Authorization(request.cookies.get('access_token'), 0):
+    if not check_Authorization(request.cookies.get('access_token'), -1):
         return jsonify({'status': 'Unauthorized'}), 401
         
     try:
@@ -586,7 +586,7 @@ def get_parking_admin():
 def get_customer_admin(plate):
     """Handles query to retrieve the customer info of a user from its plate number"""
 
-    if not check_Authorization(request.cookies.get('access_token'), 0):
+    if not check_Authorization(request.cookies.get('access_token'), -1):
         return jsonify({'status': 'Unauthorized'}), 401
 
     try:
@@ -630,7 +630,7 @@ def get_customer_admin(plate):
 def get_parking_fares_admin():
     """Handles query to retrieve parking fares"""
 
-    if not check_Authorization(request.cookies.get('access_token'), 0):
+    if not check_Authorization(request.cookies.get('access_token'), -1):
         return jsonify({'status': 'Unauthorized'}), 401
         
     try:
@@ -660,12 +660,11 @@ def get_parking_fares_admin():
         utils.close_connection_db(cursor, conn)
 
 
-
 @app.route('/api/parking/fares', methods=['PATCH'])
 def patch_parking_fares_admin():
     """Handles query to change the parking fares"""
 
-    if not check_Authorization(request.cookies.get('access_token'), id):
+    if not check_Authorization(request.cookies.get('access_token'), -1):
         return jsonify({'status': 'Unauthorized'}), 401
         
     try:

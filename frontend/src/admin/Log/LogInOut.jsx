@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 import './logInOut.css';
 import { APIGetRequest } from '../../utils/APIRequest';
+import { urlAPI } from '../../config';
 
 const LogInOut = () => {
     const [data, setData] = useState([]);
@@ -13,7 +14,7 @@ const LogInOut = () => {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        APIGetRequest({url: `http://localhost:5000/admin/parking/`, setData: setData, setStatus: setStatus});
+        APIGetRequest({url: `${urlAPI}/parking`, setData: setData, setStatus: setStatus});
     }, []);
     
     useEffect(() => {
@@ -52,7 +53,6 @@ const LogInOut = () => {
 
     useEffect(() => {
         setLog(logUnformatted.filter(({plate}) => plate.includes(search)));
-        console.log(log);
     }, [search, logUnformatted]);
 
     return (<>
