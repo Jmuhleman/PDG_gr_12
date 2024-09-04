@@ -1,12 +1,18 @@
 
 from datetime import datetime
 import psycopg2
+import os
+
+db_host = os.environ.get('HOST_DB')
+
+if db_host is None:
+    db_host = 'localhost'
 
 db_params = {
     'dbname': 'pdg_db',
     'user': 'postgres',
     'password': 'root',
-    'host': 'localhost',
+    'host': db_host,
     'port': '5432'
 }
 
