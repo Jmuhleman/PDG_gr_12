@@ -7,6 +7,11 @@ import BillingOverview from './client/Billing/BillingOverview';
 import HomePage from './client/Home/HomePage';
 import PaymentSuccess from './client/Billing/PaymentSuccess';
 import Profile from './client/Profile/Profile';
+import AdminHub from './admin/AdminHub/AdminHub';
+import LogInOut from './admin/Log/LogInOut';
+import Fares from './admin/fares/Fares';
+import ByPlate from './admin/byPlate/ByPlate';
+import AuthRoute from './admin/components/AuthRoute';
 
 const router = createBrowserRouter([
     {
@@ -32,9 +37,26 @@ const router = createBrowserRouter([
         ],
     },
     {
-        path: "admin",
-        element: <h1>Admin</h1>,
-        children: [],
+        path: "/admin",
+        element: <AuthRoute />,
+        children: [
+            {
+                path: "/admin",
+                element: <AdminHub />,
+            },
+            {
+                path: "/admin/fares",
+                element: <Fares />,
+            },
+            {
+                path: "/admin/log",
+                element: <LogInOut />,
+            },
+            {
+                path: "/admin/byPlate",
+                element: <ByPlate />,
+            }
+        ],
     },
 ]);
 
