@@ -8,7 +8,7 @@ services:
       - app-network
   
   backend:
-    image: johan/pe-backend:lastest
+    image: johanmikami/plate-eyes-backend:lastest
     ports:
       - 5000:5000
     environment:
