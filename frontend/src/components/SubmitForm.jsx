@@ -42,7 +42,7 @@ function SubmitForm({
     if(errorMsg != '') {
       setErrorDisplayed(errorMsg);
       return};
-    if(areAllFieldsFilled){
+    if(!areAllFieldsFilled){
       setErrorDisplayed('There are empty fields');
       return;
     }
