@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import './home.css';
 import { APIPostRequestWithoutCredentials } from '../../utils/APIRequest';
 import { urlAPI } from '../../config';
-import { validatePassword } from '../../utils/PasswordValidation';
+import { passwordErrorHandler } from '../../utils/PasswordValidation';
 import countries from 'i18n-iso-countries';
 
 // Import French locale data
@@ -63,7 +63,7 @@ function Home() {
   // eslint-disable-next-line no-unused-vars
   const [cookies, setCookie] = useCookies(['client']);
   const { setClient } = useClient();
-  const [errMsg, setErrorMsg] = useState('');
+  const [errMsg, setErrMsg] = useState('');
   const navigate = useNavigate();
 
   // Initialize cookies and client state
@@ -97,16 +97,28 @@ function Home() {
 
   // Toggle form states
   const handleLoginForm = () => {
+    setErrMsg('');
     setShowLogin(true);
     setShowSignUp(false);
   };
 
   const handleSignUpForm = () => {
+    setErrMsg('');
     setShowSignUp(true);
     setShowLogin(false);
   };
 
   const handleLogin = async ({ email, password }) => {
+
+
+  if (!isValidEmail(email)) {
+    setErrMsg("Adresse email invalide.");
+    return;
+  }
+
+
+
+
 
     const formData = { "email": email, "password": password };
     console.log('Login form submitted:', formData);
@@ -114,7 +126,7 @@ function Home() {
     await APIPostRequestWithoutCredentials({ url: `${urlAPI}/sign_in`, data: formData, setData: setSignInData, setStatus: setSignInStatus });
   };
 
- /* useEffect(() => {
+  useEffect(() => {
     if (signInStatus.code >= 200 && signInStatus.code < 300) {
       const client = signInData?.id;
       const jwToken = signInData?.jwt; // Assume JWT is part of signInData
@@ -134,7 +146,7 @@ function Home() {
       }
     }
   }, [signInStatus]);
-*/
+
   const isValidPhoneNumber = (input, minDigits, maxDigits) => {
     // Regular expression to match only numbers with an optional leading +, and enforce min and max digits
     const regex = new RegExp(`^\\+?\\d{${minDigits},${maxDigits}}$`);
@@ -171,44 +183,32 @@ function Home() {
 
 
 const handleSignUp = ({ firstname, lastname, street, number, zip, town, country, phone, email, password, confirmation, plate }) => {
-  if (password !== confirmation) {
-    setErrorMsg('Les mots de passe ne sont pas identiques');
-    return;
-  }
-
-  if (!validatePassword(password)) {
-    setErrorMsg("Le mot de passe doit respecter les conditions suivantes : \n" +
-      "Contenir au moins 8 caractères \n" +
-      "et 3 des condtions suivantes : \n" +
-      "  Inclure une lettre majuscule\n" +
-      "  Inclure une lettre minuscule\n" +
-      "  Contenir au moins un chiffre\n" +
-      "  Inclure un caractère spécial");
-    return;
-  }
+ 
+  setErrMsg(''); 
+  if (!passwordErrorHandler(password,confirmation, setErrMsg)){return};
 
   const minDigitsPhone = 8;
   const maxDigitsPhone = 16;
   if (!isValidPhoneNumber(phone, minDigitsPhone, maxDigitsPhone)) {
-    setErrorMsg('Numéro de téléphone invalide. Assurez-vous qu\'il est composé de chiffres uniquement et qu\'il a entre 8 et 16 chiffres.');
+    setErrMsg('Numéro de téléphone invalide. Assurez-vous qu\'il est composé de chiffres uniquement et qu\'il a entre 8 et 16 chiffres.');
     return;
   }
 
-  const params = { lastname, firstname, street, town, zip, phone, email };
+  const params = { lastname, firstname, street, town, zip };
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === 'string' && value.length < 2) {
-      setErrorMsg(`${key} must be at least 2 characters long`);
+      setErrMsg(`Error ${key} must be at least 2 characters long.`);
       return;
     }
   }
 
   if (plate.length > 6) {
-    setErrorMsg("Le numéro de plaque doit être inférieur ou égal à 6 caractères.");
+    setErrMsg("Le numéro de plaque doit contenir moins de 7 caractères.");
     return;
   }
 
   if (!isValidEmail(email)) {
-    setErrorMsg("Adresse email invalide.");
+    setErrMsg("Adresse email invalide.");
     return;
   }
 
@@ -244,6 +244,7 @@ return (
         onSubmit={handleLogin}
         extraButton={ReturnButton}
         message={(signInStatus && (signUpStatus.code < 200 || signUpStatus.code >= 300)) ? signInStatus.text : ''}
+        errorMsg={errMsg}
       />
     )}
 

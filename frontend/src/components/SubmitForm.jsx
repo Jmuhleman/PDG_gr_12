@@ -51,14 +51,13 @@ function SubmitForm({
     if (!areAllFieldsFilled(formData)) {
       setErrorDisplayed('There are empty fields');
       return;
-    }
+  }
+      setErrorDisplayed(errorMsg);
+      
 
-    if (errorMsg !== null && errorMsg.length > 0) {
-      setErrorDisplayed(errorMsg)
-      return;
-    }
 
-    setErrorDisplayed('');
+
+  
     onSubmit(formData); // Call the custom submit handler with the current form data
   };
 
@@ -74,7 +73,7 @@ function SubmitForm({
           layout={layout} // Pass layout prop
         />
         <p className='message'>{message}</p>
-        <p className='error'>{errorDisplayed}</p>
+        <p className='form-error'>{errorDisplayed}</p>
         <button type="submit" className="submit-button">
           {buttonText}
         </button>
