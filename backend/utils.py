@@ -22,20 +22,43 @@ def enumerate_fields(user, fields, fields_address):
     return user_dict
 
 
-def format_user(user_data):
+def format_user(user_data, *args):
     """Format single or multi-user information"""
 
     fields = ['id', 'lastname', 'firstname', 'address', 'phone', 'email', 'password', 'plates']
     fields_address = ['street', 'number', 'city', 'zip', 'country']
+    usr_list = []
+
     if isinstance(user_data, tuple):
         usr_list = enumerate_fields(user_data, fields, fields_address)
+
     else:
-        print('list')
-        usr_list = []
+        var = args[0] if args[0] else fields
+
         for user in user_data:
-            usr_dict = enumerate_fields(user, fields, fields_address)
+            usr_dict = enumerate_fields(user, var, fields_address)   
             usr_list.append(usr_dict)
+
     return usr_list
+
+
+def enumerate_parking(user, fields):
+    """Extract parking fields according to headers as a dictionary."""
+    parking_list = []
+
+    for record in user:
+        parking_dict = {fields[i]: record[i] for i in range(len(fields))}
+        parking_list.append(parking_dict)
+    return parking_list
+
+
+def format_parking(parking_data):
+    """Format parking information"""
+
+    fields = ['parking_id', 'parking_name', 'fare']
+    parking_list = enumerate_parking(parking_data, fields)
+
+    return parking_list
 
 
 def verify_fields(data):
