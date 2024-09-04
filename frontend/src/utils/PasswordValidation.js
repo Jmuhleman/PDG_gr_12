@@ -44,4 +44,6 @@ export const passwordErrorHandler = (
     setErrMsg(pwdExplanation);
     return false;
   }
+
+  return true;
 }

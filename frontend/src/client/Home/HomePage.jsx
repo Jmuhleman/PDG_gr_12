@@ -116,10 +116,6 @@ function Home() {
     return;
   }
 
-
-
-
-
     const formData = { "email": email, "password": password };
     console.log('Login form submitted:', formData);
     // Add actual login logic here
@@ -159,7 +155,7 @@ function Home() {
     return regex.test(email);
   };
 
-  const handleSendSignUp = async ({ lastname, firstname, street, number, town, zip, country, phone, email, password, plate }) => {
+  const handleSendSignUp = async (lastname, firstname, street, number, town, zip, country, phone, email, password, plate) => {
     const formData = {
       "lastname": lastname,
       "firstname": firstname,
@@ -183,17 +179,19 @@ function Home() {
 
 
 const handleSignUp = ({ firstname, lastname, street, number, zip, town, country, phone, email, password, confirmation, plate }) => {
- 
+  
   setErrMsg(''); 
-  if (!passwordErrorHandler(password,confirmation, setErrMsg)){return};
 
+  
+  if (!passwordErrorHandler(password,confirmation, setErrMsg)){return}
+  
   const minDigitsPhone = 8;
   const maxDigitsPhone = 16;
   if (!isValidPhoneNumber(phone, minDigitsPhone, maxDigitsPhone)) {
     setErrMsg('Numéro de téléphone invalide. Assurez-vous qu\'il est composé de chiffres uniquement et qu\'il a entre 8 et 16 chiffres.');
     return;
   }
-
+  
   const params = { lastname, firstname, street, town, zip };
   for (const [key, value] of Object.entries(params)) {
     if (typeof value === 'string' && value.length < 2) {
@@ -211,7 +209,7 @@ const handleSignUp = ({ firstname, lastname, street, number, zip, town, country,
     setErrMsg("Adresse email invalide.");
     return;
   }
-
+  
   handleSendSignUp(lastname, firstname, street, number, town, zip, country, phone, email, password, plate);
 }
 

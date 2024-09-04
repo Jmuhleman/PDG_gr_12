@@ -15,7 +15,7 @@ const Profile = () => {
     const [profileStatus, setProfileStatus] = useState({code: 0, text: ""});
     const [deleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
     const {client, setClient} = useClient();
-    const {errorMessage, setErrorMessage} = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
     const [canDeletePlate, setCanDeletePlate] = useState(false);
     const [newPlate, setNewPlate] = useState("");

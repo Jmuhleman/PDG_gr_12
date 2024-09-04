@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from argon2 import PasswordHasher
@@ -307,6 +307,7 @@ def set_user():
     
     data = request.get_json()
 
+
     try:
         if not utils.verify_fields(data):
             return jsonify({'status': 'Fields not valid'}), 400
@@ -409,7 +410,7 @@ def sign_in_customer():
             except:
                 return jsonify({'status': 'Invalid password'}), 401
             
-            expiration_time = datetime.now(datetime.timezone.utc) + timedelta(hours=1, minutes=30)
+            expiration_time = datetime.now(timezone.utc) + timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
                 'admin': False,
