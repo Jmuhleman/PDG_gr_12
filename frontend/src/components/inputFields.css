@@ -1,58 +1,69 @@
 /* Mobile-first: Single-column layout by default */
 .form-field-container {
-    display: grid;
-    grid-template-columns: 1fr; /* Single column */
-    gap: 15px; /* Space between items */
-    width: 100%; /* Full width of the container */
-    margin: 0 auto; /* Center the form */
+  display: grid;
+  grid-template-columns: 1fr; /* Single column */
+  gap: 15px; /* Space between items */
+  width: 100%; /* Full width of the container */
+  margin: 0 auto; /* Center the form */
+}
+
+/* Full-width fields to span the entire column */
+.form-field.full-width {
+  grid-column: span 1; /* Full width in mobile view */
+}
+
+/* General styling for form fields */
+.form-field {
+  display: flex;
+  flex-direction: column; /* Stack label and input vertically */
+  gap: 5px; /* Space between label and input */
+}
+
+/* Label styling */
+.form-label {
+  font-size: 1rem;
+  color: #333; /* Dark grey for text */
+  font-weight: bold;
+}
+
+/* Input field styling */
+.form-input {
+  width: 100%; /* Full width */
+  padding: 10px; /* Padding inside the input */
+  border: 1px solid #ccc; /* Light grey border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 1rem; /* Font size */
+  transition: border-color 0.3s ease; /* Smooth border color transition */
+}
+
+/* Select field styling */
+.form-select {
+  width: 100%; /* Full width */
+  padding: 10px; /* Padding inside the select */
+  border: 1px solid #ccc; /* Light grey border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 1rem; /* Font size */
+  transition: border-color 0.3s ease; /* Smooth border color transition */
+  background-color: white; /* White background */
+}
+
+/* Focus styling for input and select fields */
+.form-input:focus,
+.form-select:focus {
+  border-color: #0872E3; /* Primary color on focus */
+  outline: none;
+  box-shadow: 0 0 5px rgba(8, 114, 227, 0.2); /* Subtle shadow */
+}
+
+/* Media query for tablets and larger screens */
+@media (min-width: 600px) {
+  .form-field-container {
+    grid-template-columns: repeat(2, 1fr); /* Two equal columns for larger screens */
+    gap: 20px; /* Increase gap for better spacing on larger screens */
   }
-  
-  /* Full-width fields to span the entire column */
+
+  /* Ensure full-width fields span both columns on larger screens */
   .form-field.full-width {
-    grid-column: span 1; /* Full width in mobile view */
+    grid-column: span 2; /* Full width across both columns */
   }
-  
-  /* General styling for form fields */
-  .form-field {
-    display: flex;
-    flex-direction: column; /* Stack label and input vertically */
-    gap: 5px; /* Space between label and input */
-  }
-  
-  /* Label styling */
-  .form-label {
-    font-size: 1rem;
-    color: #333; /* Dark grey for text */
-    font-weight: bold;
-  }
-  
-  /* Input field styling */
-  .form-input {
-    width: 100%; /* Full width */
-    padding: 10px; /* Padding inside the input */
-    border: 1px solid #ccc; /* Light grey border */
-    border-radius: 4px; /* Rounded corners */
-    font-size: 1rem; /* Font size */
-    transition: border-color 0.3s ease; /* Smooth border color transition */
-  }
-  
-  /* Focus styling for input fields */
-  .form-input:focus {
-    border-color: #0872E3; /* Primary color on focus */
-    outline: none;
-    box-shadow: 0 0 5px rgba(8, 114, 227, 0.2); /* Subtle shadow */
-  }
-  
-  /* Media query for tablets and larger screens */
-  @media (min-width: 600px) {
-    .form-field-container {
-      grid-template-columns: repeat(2, 1fr); /* Two equal columns for larger screens */
-      gap: 20px; /* Increase gap for better spacing on larger screens */
-    }
-  
-    /* Ensure full-width fields span both columns on larger screens */
-    .form-field.full-width {
-      grid-column: span 2; /* Full width across both columns */
-    }
-  }
-  
+}

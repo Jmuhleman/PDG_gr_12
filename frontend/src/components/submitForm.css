@@ -42,6 +42,15 @@ h2 {
   box-shadow: 0 0 5px rgba(8, 114, 227, 0.2);
 }
 
+.form-error {
+  white-space: pre-line;
+  color: rgb(0, 60, 255);
+  font-size: 1rem;
+  margin-bottom: 8px;
+  text-align: left; /* Ensure the error text is aligned left */
+  grid-column: span 2; /* Ensure it spans the full width in a two-column grid */
+}
+
 /* Button styling */
 .submit-button, .extra-button {
   background-color: #0872E3;

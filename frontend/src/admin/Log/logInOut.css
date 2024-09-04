@@ -1,0 +1,25 @@
+td {
+    padding: 0.4em 2em;
+}
+table {margin: 0 auto;}
+
+.trData {
+    color: white;
+}
+
+tr.OUT {
+    background-color: #133a7e;
+}
+
+tr.IN {
+    background-color: #148953;
+}
+
+p.desc {
+    rotate: 180deg;
+}
+
+.flex-row {
+    display: flex;
+    justify-content: center;
+}
