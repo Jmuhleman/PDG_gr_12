@@ -1,10 +1,34 @@
-version: '1'
+version: '3'
 services:
   frontend:
-    image: plate-eyes/frontend:v1
+    image: johanmikami/plate-eyes-frontend
     ports:
       - 3000:3000
+    networks:
+      - app-network
+  
   backend:
-    image: plate-eyes/backend:v1
+    image: johanmikami/plate-eyes-backend:lastest
     ports:
       - 5000:5000
+    environment:
+      HOST_DB: 'db'
+    networks:
+      - app-network
+    depends_on:
+      - db
+
+  db:
+    image: jmuhlema/postgresql:16
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: pdg_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
