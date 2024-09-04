@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './submitForm.css';
 import InputFields from './InputFields'; // Import the InputFields component
@@ -6,13 +6,19 @@ import InputFields from './InputFields'; // Import the InputFields component
 function SubmitForm({
   label = 'Your Information:',
   buttonText = 'Submit',
-  onSubmit = () => {}, // Default to an empty function if no handler is provided
+  onSubmit = () => { }, // Default to an empty function if no handler is provided
   fieldsConfig = [], // Default to an empty array if no configuration is provided
   extraButton = null,
   layout = 'single-column', // Default to single-column layout
   message = '',
   errorMsg = ''
 }) {
+
+  useEffect(() => {
+    setErrorDisplayed(errorMsg);
+
+  }, [errorMsg]);
+
 
   const [errorDisplayed, setErrorDisplayed] = useState("");
 
@@ -23,9 +29,9 @@ function SubmitForm({
     fieldsConfig.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {})
   );
 
-  const areAllFieldsFilled = Object.values(formData).every(
-    (value) => value !== '' && value !== null && value !== undefined
-  );
+  const areAllFieldsFilled = (data) => {return Object.values(data).every(
+    (value) => value !== null && value !== undefined && value !== '' 
+  );}
 
   // Update state based on input field name
   const handleChange = (event) => {
@@ -36,16 +42,22 @@ function SubmitForm({
     });
   };
 
+
+
   // Handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-    if(errorMsg != '') {
-      setErrorDisplayed(errorMsg);
-      return};
-    if(!areAllFieldsFilled){
+
+    if (!areAllFieldsFilled(formData)) {
       setErrorDisplayed('There are empty fields');
       return;
     }
+
+    if (errorMsg !== null && errorMsg.length > 0) {
+      setErrorDisplayed(errorMsg)
+      return;
+    }
+
     setErrorDisplayed('');
     onSubmit(formData); // Call the custom submit handler with the current form data
   };
@@ -86,7 +98,7 @@ SubmitForm.propTypes = {
   extraButton: PropTypes.element,
   layout: PropTypes.oneOf(['single-column', 'two-column']), // Determine layout type
   message: PropTypes.string,
-  message2: PropTypes.string
+  errorMsg: PropTypes.string
 };
 
 export default SubmitForm;
