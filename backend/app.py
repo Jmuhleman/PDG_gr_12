@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from argon2 import PasswordHasher
@@ -21,9 +21,12 @@ ph = PasswordHasher()
 
 def check_Authorization(token, customer_id=None):
     try:
-        if(customer_id is not None):
-            decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')):
+        decode = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        if(customer_id == -1):
+            if(decode['admin'] and decode['exp'] > datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')):
+                return True
+        elif(customer_id is not None):
+            if(int(str(customer_id)) == int(decode['id']) and decode['exp'] > datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')):
                 return True
         else:
             return True
@@ -87,12 +90,11 @@ def get_users():
 
 
 @app.route('/api/users/<id>', methods=['GET'])
-def get_user(id):
+def get_user_id(id):
     """Handles requests to retrieve user data based on the user ID."""
 
     if not check_Authorization(request.cookies.get('access_token'), id):
         return jsonify({'status': 'Unauthorized'}), 401
-
     try:
         cursor, conn = utils.connect_to_db(utils.db_params)
         query = """
@@ -111,7 +113,7 @@ def get_user(id):
         WHERE
             id = %s
         GROUP BY
-            id,lastname, firstname, street, number, city, zip, country, phone, email, password;
+            id, lastname, firstname, street, number, city, zip, country, phone, email, password;
         """
         cursor.execute(query, (id,))
         user_data = cursor.fetchone()
@@ -120,6 +122,7 @@ def get_user(id):
             return jsonify({'status': 'User ID not found'}), 404
 
         user_dict = utils.format_user(user_data)
+        user_dict.pop('password')
 
         return jsonify(user_dict), 200
     
@@ -377,8 +380,8 @@ def set_user():
 
 
 @app.route('/api/sign_in', methods=['POST']) # Changed from GET to POST to prevent sensitive information exposure in URLs and logs. 
-def sign_in():
-    """Handles requests to sign_in."""
+def sign_in_customer():
+    """Handles customer requests to sign_in."""
     if request.method == 'OPTIONS':
         # CORS preflight request
         return _build_cors_preflight_response()
@@ -406,9 +409,10 @@ def sign_in():
             except:
                 return jsonify({'status': 'Invalid password'}), 401
             
-            expiration_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1, minutes=30)
+            expiration_time = datetime.now(datetime.timezone.utc) + timedelta(hours=1, minutes=30)
             jwt_payload = {
                 'id': id,
+                'admin': False,
                 'exp': expiration_time.strftime('%Y%m%d%H%M%S')
             }
             token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
@@ -421,6 +425,52 @@ def sign_in():
     finally:
         utils.close_connection_db(cursor, conn)
 
+
+@app.route('/api/admin/sign_in', methods=['POST']) # Changed from GET to POST to prevent sensitive information exposure in URLs and logs. 
+def sign_in_admin():
+    """Handles admin requests to sign_in."""
+    if request.method == 'OPTIONS':
+        # CORS preflight request
+        return _build_cors_preflight_response()
+
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+
+        query = """
+            SELECT id, password
+            FROM admins
+            WHERE email = %s
+        """
+
+        data = request.get_json()
+
+        cursor.execute(query, (data.get('email'),))
+        (id, stored_hash) = cursor.fetchone()
+
+        if id is None:
+            return jsonify({'status': 'User not found'}), 404
+        else:
+            try:
+                # Verify the password using Argon2
+                ph.verify(stored_hash, data.get('password'))
+            except:
+                return jsonify({'status': 'Invalid password'}), 401
+                
+            expiration_time = datetime.now(timezone.utc) + timedelta(hours=1, minutes=30)
+            jwt_payload = {
+                'id': id,
+                'admin': True,
+                'exp': expiration_time.strftime('%Y%m%d%H%M%S')
+            }
+            token = jwt.encode(jwt_payload, SECRET_KEY, algorithm='HS256')
+            response = make_response(jsonify({'status': 'Login successful', 'id': id, 'jwt': token}))
+            return response
+
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+
+    finally:
+        utils.close_connection_db(cursor, conn)
 
 @app.route('/api/plate/<plate_no>', methods=['GET'])
 def get_plate(plate_no):
@@ -470,7 +520,6 @@ def async_create_payment_intent():
     amount = data['amount']
     currency = data['currency']
     tickets = data['ticket_id']
-    print(tickets)
     try:
         payment_intent = stripe.PaymentIntent.create(
             amount=int(amount * 100),  # amount should be in cents
@@ -479,7 +528,6 @@ def async_create_payment_intent():
         pendingIntent[payment_intent['client_secret']] = tickets
         return {"clientSecret": payment_intent['client_secret']}, 200
     except Exception as e:
-        print(e);
         return jsonify({'status': str(e)}), 500
 
 @app.route('/api/finish_payment_intent', methods=['POST'])
@@ -501,8 +549,160 @@ def finish_payment_intent():
         conn.commit()
         return {"status": "success"}, 200
     except Exception as e:
-        print(e);
         return jsonify({'status': str(e)}), 500
+
+
+@app.route('/api/parking', methods=['GET'])
+def get_parking_admin():
+    """Handles query to retrieve all users"""
+
+    if not check_Authorization(request.cookies.get('access_token'), -1):
+        return jsonify({'status': 'Unauthorized'}), 401
+        
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+        SELECT *
+        FROM logs
+        """
+        cursor.execute(query)
+        user_data = cursor.fetchall()
+        
+        if user_data is None:
+            return jsonify({'status': 'No parking found'}), 404
+
+        fields_plate = ['id', 'plate', 'parking_id', 'timestamp_in', 'timestamp_out']
+        user_dict = utils.format_user(user_data, fields_plate)
+        
+        return jsonify(user_dict), 200
+    
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/users/plates/<plate>', methods=['GET'])
+def get_customer_admin(plate):
+    """Handles query to retrieve the customer info of a user from its plate number"""
+
+    if not check_Authorization(request.cookies.get('access_token'), -1):
+        return jsonify({'status': 'Unauthorized'}), 401
+
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            SELECT
+                id,
+                lastname,
+                firstname,
+                ARRAY[street, number, city, zip, country] AS address,
+                phone,
+                email,
+                password,
+                ARRAY_AGG(plate ORDER BY plate) AS plates
+            FROM
+                customers
+                INNER JOIN plate_numbers ON id = customer_id
+            WHERE
+                plate = %s
+            GROUP BY
+                id, lastname, firstname, street, number, city, zip, country, phone, email, password;   
+        """
+        cursor.execute(query, (plate,))
+        user_data = cursor.fetchone()
+        
+        if user_data is None:
+            return jsonify({'status': 'No customer with that plate'}), 404
+
+        user_dict = utils.format_user(user_data)
+        user_dict.pop('password')
+
+        return jsonify(user_dict), 200
+    
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/parking/fares', methods=['GET'])
+def get_parking_fares_admin():
+    """Handles query to retrieve parking fares"""
+
+    if not check_Authorization(request.cookies.get('access_token'), -1):
+        return jsonify({'status': 'Unauthorized'}), 401
+        
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            SELECT
+                parking_id,
+                name,
+                fare
+            FROM
+                fares
+                INNER JOIN parking ON parking_id = id
+        """
+        cursor.execute(query)
+        fares = cursor.fetchall()
+        
+        if fares is None:
+            return jsonify({'status': 'No parking'}), 404
+
+        fares_dict = utils.format_parking(fares)
+
+        return jsonify(fares_dict), 200
+
+    except Exception as e:
+        return jsonify({'status': str(e)}), 500
+    finally:
+        utils.close_connection_db(cursor, conn)
+
+
+@app.route('/api/parking/fares', methods=['PATCH'])
+def patch_parking_fares_admin():
+    """Handles query to change the parking fares"""
+
+    if not check_Authorization(request.cookies.get('access_token'), -1):
+        return jsonify({'status': 'Unauthorized'}), 401
+        
+    try:
+        cursor, conn = utils.connect_to_db(utils.db_params)
+        query = """
+            UPDATE 
+                fares
+            SET
+                fare = %s
+            WHERE 
+                parking_id = %s;
+        """
+        data = request.get_json()
+
+        for k in range(len(data)):
+            new_fare = 0;parking_id = ""
+            for key, val in data[k].items():
+                parking_id = val if key == "parking_id" else parking_id
+                new_fare = val if key == "fare" else new_fare
+            
+            cursor.execute(query, (new_fare, parking_id))
+            
+            if cursor.rowcount == 0:
+                conn.rollback() 
+                return jsonify({'status': 'Parking id not found'}), 400
+
+        conn.commit()
+
+        return jsonify({'status': 'Parking fares update completed'}), 200
+    
+    except Exception as e:
+        if conn:
+            conn.rollback()  # En cas d'erreur, on annule les modifications
+        return jsonify({'status': str(e)}), 500
+    
+    finally:
+        utils.close_connection_db(cursor, conn)
+
 
 
 @app.route('/api/hello', methods=['GET'])
@@ -514,6 +714,6 @@ if __name__ == '__main__':
     ia_out = threading.Thread(target=ia.ia, args=('out',), daemon=False)
     ia_in.start()
     ia_out.start()
-    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
+    app.run(host="0.0.0.0", port="5000", debug=False) # Mode debug=false indispensable pour n'avoir qu'1 seul thread (pas de redémarrage de Flask)
     ia_in.join()
     ia_out.join()

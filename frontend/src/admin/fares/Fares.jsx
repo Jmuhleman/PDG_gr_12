@@ -1,46 +1,38 @@
 import React, { useEffect, useState } from 'react';
-
-const data = [
-    {
-        name: 'Label 1',
-        id: 1,
-        fare: 123
-    },
-    {
-        name: 'Label 2',
-        id: 2,
-        fare: 123
-    },
-    {
-        name: 'Label 3',
-        id: 3,
-        fare: 123
-    }
-]
+import { APIGetRequest, APIPatchRequest } from '../../utils/APIRequest';
+import { urlAPI } from '../../config';
+import './fares.css';
 
 const Fares = () => {
     const [fares, setFares] = useState([]);
+    const [faresByID, setFaresByID] = useState({});
+    const [status, setStatus] = useState({code: 0, text: ''});
 
-    useEffect(() => {
-        setFares(data);
+    const initialize = (data) => {
+        setFares(data)
+        let temp = {}
+        data.map(fare => Object.assign(temp, {[fare.parking_id]: fare.fare}))
+        setFaresByID(temp)
+    }
+
+    useEffect( () => {
+        APIGetRequest({url: `${urlAPI}/parking/fares`, setData: initialize, setStatus: setStatus});
     }, []);
 
+    const handleSubmit = () => {
+        const newFares = Object.entries(faresByID).map(([key, value]) => ({parking_id: key, fare: value}));
+        APIPatchRequest({url: `${urlAPI}/parking/fares`, data: newFares, setStatus: setStatus});
+    }
+
     const handleChangeFares = (id, value) => {
-        let newFares = fares
-        if(value>0){
-            newFares = fares.map(fare => {
-                if (fare.id === id) {
-                    fare.fare = value;
-                }
-                return fare;
-            });
-        }
-        setFares(newFares);
+        if(value !== '' && !isNaN(value)) 
+            setFaresByID({...faresByID, [id]: parseInt(value)})
     };
 
     return (<>
         <h1>Tarif</h1>
-        <table>
+        <p style={{color: 'red'}}>{(status.code<200 || status.code >=300) && status.text}</p>
+        {fares.length !== 0 && <table>
             <thead>
                 <tr>
                     <th>Parking</th>
@@ -49,16 +41,17 @@ const Fares = () => {
             </thead>
             <tbody>
                 {
-                    fares && fares.map(fare => (
-                        <tr key={fare.id}>
-                            <td>{fare.name}</td>
-                            <td><input type="number" min='0' value={fare.fare} onChange={(e)=>handleChangeFares(fare.id, e.target.value)}/></td>
+                    fares.map(fare => (
+                        <tr key={fare.parking_id}>
+                            <td>{fare.parking_name}</td>
+                            <td><input type="number" min='1' value={faresByID[fare.parking_id]} onChange={(e)=>handleChangeFares(fare.parking_id, e.target.value)}/></td>
                         </tr>
                     ))
                 }
             </tbody>
-        </table>
+        </table>}
         <button className='btn white-btn' onClick={() => window.history.back()}>Retour</button>
+        {fares.length !== 0 && <button className='btn blue-btn' onClick={() => handleSubmit()}>Sauvegarder</button>}
     </>);
 };
 

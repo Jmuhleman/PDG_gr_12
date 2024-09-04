@@ -4,7 +4,10 @@ import './adminHub.css';
 
 const AdminHub = () => {
 
-    const handleLogout = () => {};
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        window.location.href = '/admin';
+    };
 
     return (<>
         <div className='PanelAdmin'>
