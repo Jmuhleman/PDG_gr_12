@@ -7,6 +7,7 @@ import PlateButton from '../../components/PlateButton';
 import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
 import { urlAPI } from '../../config';
+import { passwordErrorHandler } from '../../utils/PasswordValidation';
 
 const Profile = () => {
     const [cookies] = useCookies(['client']);
@@ -14,6 +15,7 @@ const Profile = () => {
     const [profileStatus, setProfileStatus] = useState({code: 0, text: ""});
     const [deleteStatus, setDeleteStatus] = useState({code: 0, text: ""});
     const {client, setClient} = useClient();
+    const {errorMessage, setErrorMessage} = useState("");
     const navigate = useNavigate();
     const [canDeletePlate, setCanDeletePlate] = useState(false);
     const [newPlate, setNewPlate] = useState("");
@@ -55,7 +57,12 @@ const Profile = () => {
 
     const [changePassword, setChangePassword] = useState(false);
     const [changePasswordStatus, setChangePasswordStatus] = useState({code: 0, text: ""});
+    
     const handleChangePassword = async (formData) => {
+        setErrorMessage('');
+        if(passwordErrorHandler(formData.password, formData.confimPassword, setErrorMessage)){return;}
+
+
         const data = {password: formData.oldPassword, new_password: formData.password}
         await APIPatchRequest({url: `${urlAPI}/users/${client.value}/password`, data: data, setStatus: setChangePasswordStatus});
         setChangePassword(false)
@@ -92,7 +99,8 @@ const Profile = () => {
                 buttonText='Confirmer' 
                 onSubmit={handleChangePassword} 
                 fieldsConfig={changePasswordFields} 
-                message={changePasswordStatus.text} />}
+                message={changePasswordStatus.text} 
+                errorMsg={errorMessage}/>}
 
             <button className='btn white-btn' onClick={() => window.history.back()}>Back</button>
         </div>
