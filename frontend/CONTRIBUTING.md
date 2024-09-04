@@ -2,7 +2,7 @@
 
 ## Présentation du projet
 
-**Plate Eyes** est un logiciel avec une interface web conçu pour scanner les plaques d'immatriculation afin de simplifier le stationnement et d'éliminer les barrières physiques. Le projet inclut également une fonctionnalité de paiement via Stripe prenant en charges diver ,oyen de payement commme les cartes de crédits et Twint. Le projet est développé en utilisant Flask et Python pour le backend (notamment pour l'intelligence artificielle), React pour le frontend, et Docker pour la conteneurisation.
+**Plate Eyes** est un logiciel avec une interface web conçu pour scanner les plaques d'immatriculation afin de simplifier le stationnement et d'éliminer les barrières physiques. Le projet inclut également une fonctionnalité de paiement via Stripe prenant en charges divers moyens de paiement commme les cartes de crédits et Twint. Le projet est développé en utilisant Flask et Python pour le backend (notamment pour l'intelligence artificielle), React pour le frontend, et Docker pour la conteneurisation.
 
 ## Types de contributions recherchées
 
