@@ -26,7 +26,7 @@ const Profile = () => {
         } else if (client.value === ""){
             setClient(cookies.client);
         }
-        if (client.value != ""){
+        if (client.value !== ""){
             APIGetRequest({url: `${urlAPI}/users/${client.value}`, setData: setProfileData, setStatus: setProfileStatus});
             if(profileStatus && profileStatus.code === 401){
                 console.error(profileStatus.text);
