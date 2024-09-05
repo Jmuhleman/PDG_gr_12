@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 import SubmitForm from '../../components/SubmitForm';
 import AuthButtons from '../../components/AuthButtons';
@@ -22,7 +21,7 @@ countries.registerLocale(frLocale);
 function Home() {
   // Form field configurations
   const PlateConfig = [
-    { id: 'plate', label: 'Numéro de plaque : ', type: 'text', placeholder: 'VD09815...', className: 'full-width' }
+    { id: 'plate', label: 'Numéro de plaque : ', type: 'text', placeholder: 'VD19815...', className: 'full-width' }
   ];
 
   const LoginConfig = [
@@ -50,7 +49,7 @@ function Home() {
     { id: 'email', label: "Email :", type: 'email', placeholder: '', className: 'full-width' },
     { id: 'password', label: "Mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
     { id: 'confirmation', label: "Confirmer le mot de passe :", type: 'password', placeholder: '', className: 'full-width' },
-    { id: 'plate', label: "Numéro de plaque :", type: 'text', placeholder: 'VD09815...', className: 'full-width' }
+    { id: 'plate', label: "Numéro de plaque :", type: 'text', placeholder: 'VD19815...', className: 'full-width' }
   ];
 
 
@@ -200,11 +199,6 @@ const handleSignUp = ({ firstname, lastname, street, number, zip, town, country,
     }
   }
 
-  if (plate.length > 6) {
-    setErrMsg("Le numéro de plaque doit contenir moins de 7 caractères.");
-    return;
-  }
-
   if (!isValidEmail(email)) {
     setErrMsg("Adresse email invalide.");
     return;
@@ -228,8 +222,8 @@ return (
       onLogin={handleLoginForm}
       onSignUp={handleSignUpForm}
     />
-    <h1>Welcome to Our Website</h1>
-    <p>This is the homepage where you can find an overview of our services and features.</p>
+    <h1>Bienvenue sur Plate Eyes</h1>
+    <p>{"Entrez dès à présent votre plaque d'immatriculation pour payer votre stationnement"}</p>
 
     {!showLogin && !showSignUp && (
       <SubmitForm label="Numéro de plaque : " fieldsConfig={PlateConfig} onSubmit={handleSubmit} />
@@ -237,7 +231,7 @@ return (
 
     {showLogin && (
       <SubmitForm
-        label="Login : "
+        label="Connexion"
         fieldsConfig={LoginConfig}
         onSubmit={handleLogin}
         extraButton={ReturnButton}
@@ -248,7 +242,7 @@ return (
 
     {showSignUp && (
       <SubmitForm
-        label="Sign Up: "
+        label="Inscription"
         fieldsConfig={SignUpConfig}
         onSubmit={handleSignUp}
         extraButton={ReturnButton}
@@ -256,17 +250,6 @@ return (
         errorMsg={errMsg}
       />
     )}
-
-    <nav>
-      <ul>
-        <li>
-          <Link to="/billing_overview">Billing Overview</Link>
-        </li>
-        <li>
-          <Link to="/admin">Admin Section</Link>
-        </li>
-      </ul>
-    </nav>
   </div>
 );
 }
