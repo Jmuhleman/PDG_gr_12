@@ -24,7 +24,7 @@ const PaymentSuccess = () => {
     }, []);
 
     return (
-        <div>
+        <div className='billingSuccess'>
             {searchParams.get("redirect_status") === "succeeded" && <h2>Paiement Effectué !</h2>}
             {searchParams.get("redirect_status") === "failed" && <h2>Erreur lors du paiement</h2>}
             {searchParams.get("redirect_status") === "pending" && <h2>chargement</h2>}

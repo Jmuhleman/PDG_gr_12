@@ -54,10 +54,14 @@
     backdrop-filter: blur(16px);
 }
 
+.pay-plate-pbt {
+    margin: 10px auto;
+}
+
 .checkoutPanel {
     margin: 0px 10%;
     display: grid;
-    grid-template-areas: "a a" "b c" "d d";
+    grid-template-areas: "a" "b" "c" "d";
     gap: 1rem;
     padding: 1rem;
     border: solid 1px #ccc;
@@ -81,6 +85,12 @@
     }
     .checkoutButton {
         grid-area: d;
+    }
+}
+
+@media screen and (min-width: 600px) {
+    .checkoutPanel {
+        grid-template-areas: "a a" "b c" "d d";
     }
 }
 
@@ -152,4 +162,8 @@
 
 .white-btn:hover {
     background-color: #bcd9f7; /* Slightly darker shade on hover */
+}
+
+.billingSuccess {
+    margin: 10% auto;
 }
