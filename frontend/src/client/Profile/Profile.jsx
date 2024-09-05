@@ -88,7 +88,7 @@ const Profile = () => {
                         <input id='newPlate' className='textarea' name='NewPlate' type='text' value={newPlate} onChange={handleChangeNewPlate} placeholder='VD12345' />
                         <input className='submit btn blue-btn' type='submit' value={"Ajouter la plaque d'immatriculation"} />
                     </form>}
-                    {showAddPlate && <p style={{color: 'red'}}>{newPlateStatus.text}</p>}
+                    {showAddPlate < 200 && showAddPlate > 299 && <p style={{color: 'red'}}>{newPlateStatus.text}</p>}
                 </div>
             ) : (
                 <p>Loading profile data...</p>

@@ -1,14 +1,14 @@
 version: '3'
 services:
   frontend:
-    image: johanmikami/plate-eyes-frontend
+    image: johanmikami/plate-eyes-frontend:latest
     ports:
       - 3000:3000
     networks:
       - app-network
   
   backend:
-    image: johanmikami/plate-eyes-backend:lastest
+    image: johanmikami/plate-eyes-backend:latest
     ports:
       - 5000:5000
     environment:

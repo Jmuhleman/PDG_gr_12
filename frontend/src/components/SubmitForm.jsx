@@ -5,7 +5,7 @@ import InputFields from './InputFields'; // Import the InputFields component
 
 function SubmitForm({
   label = 'Your Information:',
-  buttonText = 'Submit',
+  buttonText = 'Valider',
   onSubmit = () => { }, // Default to an empty function if no handler is provided
   fieldsConfig = [], // Default to an empty array if no configuration is provided
   extraButton = null,
