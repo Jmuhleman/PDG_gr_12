@@ -124,7 +124,7 @@ export default function BillingOverview() {
     }
 
     return (
-        <div>
+        <div className='overview'>
             <h1>Toutes vos factures</h1>
             {
                 status && status.code !== 200 ? <h2>Request Status : {status.text}</h2> : null
@@ -142,7 +142,7 @@ export default function BillingOverview() {
                     if(infoBill.length === 0) return <h2 key={plate}>Pas de facture pour la plaque {plate}</h2>
                     else {
                         return (<div key={plate}>
-                            <h2 onClick={handleOnClick({plate:[plate], idBill:[]})}>Facture pour la plaque {plate}</h2>
+                            <h2>Facture pour la plaque {plate}</h2>
                             <div className="billings">
                                 {
                                     infoBill.map(({parking, timestamp_in, timestamp_out, duration, amount }, index) => {
@@ -157,6 +157,7 @@ export default function BillingOverview() {
                                     })
                                 }
                             </div>
+                            <button onClick={handleOnClick({plate:[plate], idBill:[]})} className='btn blue-btn pay-plate-pbt'>Payer pour la plaque {plate}</button>
                         </div>)
                     }
                 })

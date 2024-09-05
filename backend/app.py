@@ -514,7 +514,6 @@ def get_plate(plate_no):
 
 pendingIntent = {}
 stripe.api_key = "sk_test_51Pt6wyRvF3tg1R6w1sVcUO1Gfbgc2wJ8Wt5Q9zCyf4c0fg1Aa3EoSpRE6y0CmZGdtTFAqjCLuaCdv7vuQno2aTRF00d1TgZ1wv"
-
 @app.route('/api/create_payment_intent', methods=['POST'])
 def async_create_payment_intent():
     data = request.json
@@ -544,7 +543,7 @@ def finish_payment_intent():
         tickets = pendingIntent[client_secret]
 
         cursor, conn = utils.connect_to_db(utils.db_params)
-        ftickets = '('+str(tickets[0])+')' if len(tickets) == 1 else tuple(tickets)
+        ftickets = '('+str(tickets[0])+')' if len(tickets) == 1 else str(tuple(tickets))
         query = "DELETE FROM logs WHERE id IN " + ftickets + ";"
         cursor.execute(query)
         conn.commit()
