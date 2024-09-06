@@ -46,7 +46,7 @@ Installe les dépendances du projet pour pouvoir lancer l'app.
 
 Dans le répertoire du projet, vous pouvez exécuter :
 
-### `npm start`
+#### `npm start`
 
 Exécute l'application en mode développement.
 Ouvrez [http://localhost:3000](http://localhost:3000) pour le voir dans votre navigateur.
@@ -54,7 +54,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000) pour le voir dans votre na
 La page se rechargera automatiquement lorsque vous apportez des modifications.
 Vous pouvez également voir les erreurs de lint dans la console.
 
-### `npm test`
+#### `npm test`
 
 Lance le runner de tests en mode interactif.
 Consultez la section sur [l'exécution des tests](https://facebook.github.io/create-react-app/docs/running-tests) pour plus d'informations.
