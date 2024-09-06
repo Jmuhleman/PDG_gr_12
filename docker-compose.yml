@@ -1,4 +1,3 @@
-version: '3'
 services:
   frontend:
     image: johanmikami/plate-eyes-frontend:latest
