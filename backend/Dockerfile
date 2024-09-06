@@ -15,6 +15,10 @@ WORKDIR /app
 # Create the necessary directory for EasyOCR
 RUN mkdir -p /root/.EasyOCR
 
+RUN pip install --no-cache-dir easyocr && \
+    python -c "import easyocr; reader = easyocr.Reader(['en']);"
+
+
 # Copy the requirements file to the container
 COPY ./requirements.txt .
 
