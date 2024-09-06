@@ -484,7 +484,7 @@ def get_plate(plate_no):
             SELECT logs.id AS id, name AS parking, timestamp_in, timestamp_out
             FROM logs
             INNER JOIN parking ON logs.parking_id = parking.id
-            WHERE plate = %s;
+            WHERE plate = %s AND timestamp_out IS NOT NULL ;
         """
         cursor.execute(query, (plate_no,))
         res = cursor.fetchall()
